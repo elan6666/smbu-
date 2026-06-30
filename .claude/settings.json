@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.git/**)",
+      "Read(.venv/**)",
+      "Read(data/raw/**)",
+      "Read(data/processed/**)",
+      "Read(artifacts/**)",
+      "Read(models/intent/**)",
+      "Read(report/build/**)"
+    ]
+  }
+}
+

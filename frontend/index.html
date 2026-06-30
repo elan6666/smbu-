@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>深北莫报考问答系统</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <aside class="profile">
+        <h1>深北莫报考问答</h1>
+        <label>省份<input id="province" value="广东" /></label>
+        <label>科类<input id="category" value="物理类" /></label>
+        <label>分数<input id="score" type="number" placeholder="例如 590" /></label>
+        <label>位次<input id="rank" type="number" placeholder="例如 21000" /></label>
+        <label>意向专业<input id="major" placeholder="例如 电子与计算机工程" /></label>
+        <div class="examples">
+          <button data-q="广东物理类多少分能报深北莫？">广东物理类多少分能报？</button>
+          <button data-q="电子与计算机工程专业学什么？">专业介绍</button>
+          <button data-q="宿舍条件怎么样？">宿舍环境</button>
+          <button data-q="我只有分数没有位次可以判断吗？">报考风险</button>
+        </div>
+      </aside>
+      <section class="chat">
+        <div id="messages" class="messages"></div>
+        <form id="form" class="composer">
+          <input id="question" autocomplete="off" placeholder="输入报考问题..." />
+          <button type="submit">发送</button>
+        </form>
+      </section>
+      <aside class="evidence">
+        <h2>来源与表格</h2>
+        <div id="evidence">等待提问。</div>
+      </aside>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
+

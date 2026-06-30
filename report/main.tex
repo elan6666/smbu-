@@ -1,0 +1,119 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{tikz}
+\geometry{left=2.6cm,right=2.6cm,top=2.6cm,bottom=2.6cm}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue}
+
+\input{intent_metrics.tex}
+\input{eval_metrics.tex}
+
+\title{面向高考报考咨询的深圳北理莫斯科大学问答系统}
+\author{NLP 大作业项目}
+\date{2026年6月30日}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+高校报考咨询同时具有事实性、时效性和个体化特征。通用对话模型能够生成流畅回答，但在招生章程、专业设置和历年分数线等问题上容易出现来源不明或事实过期的问题。本文构建了一个面向深圳北理莫斯科大学报考场景的中文问答系统，将官方网页抓取、结构化分数线查询、检索增强生成和轻量意图分类结合起来。系统以官方招生信息网等资料为主要知识来源，将政策和专业介绍写入文档检索层，将分数线类信息写入结构化表，并通过意图路由决定检索、表格查询和澄清问题的调用路径。在当前版本中，意图分类器使用 \IntentTrainSize 条训练样本和 \IntentTestSize 条测试样本，测试准确率为 \IntentAccuracy，宏平均 F1 为 \IntentMacroFone；系统评测集包含 \EvalQuestionCount 条报考问题，路由准确率为 \EvalRouterAccuracy，检索来源覆盖率为 \EvalSourceCoverage。结果表明，一个以证据约束为核心的小型 RAG 系统比直接微调小模型更适合强事实招生咨询任务。
+\end{abstract}
+
+\section{Introduction}
+
+高考志愿填报是一类典型的高风险信息检索任务。考生和家长不仅需要知道学校和专业的基本情况，还需要理解不同年份、不同省份和不同科类下的录取数据。对于中外合作大学而言，培养模式、语言环境、专业设置和报考政策往往具有更强的学校特异性，普通搜索引擎或通用聊天机器人很难同时保证回答的完整性、可追溯性和边界表达。
+
+近年来，检索增强生成（retrieval-augmented generation, RAG）被广泛用于知识密集型自然语言处理任务。其基本思想是先从外部知识库检索相关证据，再由生成模型组织回答，从而降低模型仅依赖参数记忆时的事实错误风险\cite{lewis2020rag}。Qwen 系列模型展示了中文和多语言生成能力，Qwen3 Embedding/Reranker 进一步提供了文本表示和重排能力，为本项目的检索和生成模块提供了可扩展的模型基础\cite{qwen2024technical,qwen2025embedding}。
+
+本文的目标不是构造一个泛化聊天机器人，而是完成一个可复现的招生咨询系统。系统围绕深圳北理莫斯科大学报考场景展开，重点处理学校信息、招生政策、专业介绍、分数线查询、校园生活和报考建议等问题。与直接将抓取文本用于微调不同，本文将事实知识保留在可更新、可引用的数据层中，只使用轻量训练模块完成问题类型识别和查询路由。
+
+\section{Method}
+
+\subsection{任务定义}
+
+给定用户的中文问题 $q$ 和可选考生画像 $p$（省份、科类、分数、位次、意向专业），系统需要输出回答 $a$、问题类型 $t$、引用来源集合 $S$ 以及结构化分数线记录 $R$。当证据不足时，系统应返回澄清问题或缺失说明，而不是生成无来源的结论。
+
+\subsection{系统流程}
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.4cm, every node/.style={draw, rounded corners, align=center, minimum width=3.2cm, minimum height=0.8cm}]
+\node (src) {官方网页与表格};
+\node (ingest) [below of=src] {抓取与清洗};
+\node (store) [below of=ingest] {文档块与结构化分数线};
+\node (route) [below of=store] {意图分类与路由};
+\node (retrieve) [below left of=route, xshift=-1.7cm] {证据检索};
+\node (score) [below right of=route, xshift=1.7cm] {分数线查询};
+\node (gen) [below of=route, yshift=-2.5cm] {证据约束回答生成};
+\node (ui) [below of=gen] {Web Demo};
+\draw[->] (src) -- (ingest);
+\draw[->] (ingest) -- (store);
+\draw[->] (store) -- (route);
+\draw[->] (route) -- (retrieve);
+\draw[->] (route) -- (score);
+\draw[->] (retrieve) -- (gen);
+\draw[->] (score) -- (gen);
+\draw[->] (gen) -- (ui);
+\end{tikzpicture}
+\end{center}
+
+\subsection{数据层}
+
+数据层分为两类。第一类是官方网页和政策文本，包括招生信息网、招生章程、专业介绍和常见问题等页面。抓取脚本保存原始快照，并将 HTML 清洗为纯文本，再切分为可检索片段。第二类是结构化分数线表，字段包括年份、省份、科类、批次、录取类型、专业组、最低分、最低位次和来源链接。对于学校官网未直接以结构化表发布的历史投档数据，系统保留第三方汇总来源和政府新闻来源标记，并在回答中提示最终以考试院和学校公布为准。
+
+\subsection{检索与回答生成}
+
+当前系统实现了轻量词项检索作为基础版本。用户问题被切分为中英文词项，系统对文档片段计算词项重叠分数，并返回带标题、链接和片段的来源证据。分数线问题不依赖生成模型回答，而是优先进入结构化表查询。回答生成模块根据问题类型、检索片段、分数线记录和考生画像组织中文回答，并强制加入边界说明：系统不能保证录取，不能编造缺失分数线，也不能替代学校官方资料。
+
+\subsection{轻量模型训练}
+
+为体现 NLP 模型构建过程，本文训练了一个意图分类器，用于识别学校事实、招生政策、分数线查询、专业介绍、校园生活、奖助政策、就业深造、报考建议和不支持问题等类别。分类器采用字符 n-gram TF--IDF 特征和逻辑回归模型。该模块不记忆招生事实，只参与路由决策；当模型不可用或置信度不足时，系统回退到关键词规则。
+
+\section{Result}
+
+\subsection{系统实现结果}
+
+系统提供了一个 Web demo。页面左侧记录省份、科类、分数、位次和意向专业，中间为对话区域，右侧展示检索来源和分数线表格。该布局将“回答”和“依据”放在同一工作流中，便于老师在演示时检查系统是否真正进行了检索和结构化查询。
+
+\subsection{意图分类结果}
+
+当前意图分类器的训练集规模为 \IntentTrainSize，测试集规模为 \IntentTestSize。测试准确率为 \IntentAccuracy，宏平均 F1 为 \IntentMacroFone。该结果主要用于证明系统具有可训练的查询路由模块；由于训练集规模较小，本文不将其解释为通用语义理解能力。
+
+\subsection{系统评测结果}
+
+系统评测集覆盖学校事实、招生政策、分数线、专业、校园生活、奖助政策、就业深造、报考建议和拒答问题，共 \EvalQuestionCount 条。当前路由准确率为 \EvalRouterAccuracy，检索来源覆盖率为 \EvalSourceCoverage，平均回答长度为 \EvalAverageAnswerLength 字符。错误案例主要来自两类问题：其一，问题同时包含专业和分数线，需要更细的多标签路由；其二，官方资料未覆盖的主观体验问题只能返回边界说明。
+
+\subsection{失败模式}
+
+系统的主要局限包括三点。第一，当前分数线表仍需要用官方历年录取数据补全，缺失字段不能由模型推断。第二，词项检索能够保证可运行性，但在同义表达和长问题上不如向量检索与重排。第三，报考建议依赖考生位次、专业偏好和当年招生计划，系统只能提供资料整理和风险提示，不能给出确定录取结论。
+
+\section{Conclusion}
+
+本文实现了一个面向深圳北理莫斯科大学报考咨询的中文问答系统。系统将招生事实保留在可更新、可追溯的数据层中，通过检索和结构化查询约束回答，再用轻量训练模块完成意图路由。该设计适合课程项目的完整性要求，也避免了小模型微调在强事实场景下容易产生过期记忆和不可解释回答的问题。后续工作应补齐官方历年分数线、加入向量检索和重排模型，并扩大评测集以更稳定地衡量回答忠实性。
+
+\begin{thebibliography}{9}
+\bibitem{lewis2020rag}
+Lewis, P. et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. \textit{Advances in Neural Information Processing Systems} (2020). \url{https://arxiv.org/abs/2005.11401}
+
+\bibitem{qwen2024technical}
+Qwen Team. Qwen2.5 Technical Report (2024). \url{https://arxiv.org/abs/2412.15115}
+
+\bibitem{qwen2025embedding}
+Qwen Team. Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models (2025). \url{https://arxiv.org/abs/2506.05176}
+
+\bibitem{smbu2025regulation}
+深圳北理莫斯科大学招生信息网. 深圳北理莫斯科大学2025年夏季高考招生章程. \url{https://admission.smbu.edu.cn/info/1336/12222.htm}
+
+\bibitem{smbuadmission}
+深圳北理莫斯科大学招生信息网. \url{https://admission.smbu.edu.cn/}
+
+\bibitem{szgov2025}
+深圳市政府网站. 深圳多所高校公布2025年广东省本科批次普通类投档情况. \url{https://www.sz.gov.cn/cn/xxgk/zfxxgj/zwdt/content/post_12287337.html}
+
+\bibitem{dxsbb2025}
+大学生必备网. 2025深圳北理莫斯科大学录取分数线（含2023-2024历年）. \url{https://www.dxsbb.com/news/148133.html}
+\end{thebibliography}
+
+\end{document}
