@@ -7,7 +7,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import database, rag
+from app import database, rag, web_search
 from app.config import ROOT
 from app.generator import build_answer
 from app.llm import generate_with_qwen, qwen_enabled
@@ -28,12 +28,18 @@ def index() -> FileResponse:
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "service": "smbu-admission-assistant", "qwen_configured": qwen_enabled()}
+    return {"status": "ok", "service": "smbu-admission-assistant", "qwen_configured": qwen_enabled(), "web_search": "available"}
 
 
 @app.get("/api/search")
 def search(q: str = Query(..., min_length=1), limit: int = 5) -> dict:
     return {"query": q, "results": [item.model_dump() for item in rag.search(q, limit=limit)]}
+
+
+@app.get("/api/web-search")
+def web_search_endpoint(q: str = Query(..., min_length=1), limit: int = 3) -> dict:
+    results = web_search.search_web(q, limit=limit)
+    return {"query": q, "results": [item.model_dump() for item in results]}
 
 
 @app.get("/api/sources")
@@ -86,6 +92,22 @@ def chat(req: ChatRequest) -> ChatResponse:
     question_type, confidence = predict_intent(req.question)
     search_query = req.question
     sources = [] if question_type in {"greeting", "clarification"} else rag.search(search_query, limit=5)
+    warnings = []
+
+    if question_type not in {"greeting", "clarification"} and web_search.should_use_web_search(
+        req.question, req.enable_web_search
+    ):
+        try:
+            web_sources = web_search.search_web(req.question, limit=3)
+        except Exception as exc:
+            web_sources = []
+            warnings.append(f"联网搜索失败，已回退到本地资料库：{type(exc).__name__}。")
+        if web_sources:
+            seen_urls = {src.url for src in sources}
+            sources.extend(src for src in web_sources if src.url not in seen_urls)
+            warnings.append("已启用联网搜索；结果优先限制在深北莫官方域名。")
+        else:
+            warnings.append("联网搜索没有返回可用的官方域名结果，已使用本地资料库。")
 
     score_rows = []
     if question_type in {"score_query", "comparison_or_advice"}:
@@ -146,7 +168,6 @@ def chat(req: ChatRequest) -> ChatResponse:
         dimension_rows=dimension_rows,
         profile=req.profile,
     )
-    warnings = []
     qwen_should_rewrite = (
         qwen_enabled()
         and question_type not in {"greeting", "clarification"}

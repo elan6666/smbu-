@@ -55,6 +55,7 @@ async function ask(question) {
       rank: value("rank"),
       preferred_major: value("major"),
     },
+    enable_web_search: document.getElementById("webSearch").checked,
   };
   const res = await fetch("/api/chat", {
     method: "POST",

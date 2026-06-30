@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.schemas import SourceSnippet
 from app.main import app
 
 
@@ -77,3 +78,43 @@ def test_undergraduate_enrollment_boundary():
     assert data["question_type"] == "program_info"
     assert data["dimension_rows"]
     assert "招生人数" in data["answer"]
+
+
+def test_web_search_endpoint(monkeypatch):
+    def fake_search_web(query, *, limit=3, timeout=10):
+        return [
+            SourceSnippet(
+                source_id="web_search",
+                title="联网搜索：深圳北理莫斯科大学招生通知",
+                url="https://admission.smbu.edu.cn/info/example.htm",
+                snippet="官方招生通知摘要",
+            )
+        ]
+
+    monkeypatch.setattr("app.main.web_search.search_web", fake_search_web)
+    response = client.get("/api/web-search", params={"q": "最新招生通知"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["results"][0]["source_id"] == "web_search"
+
+
+def test_chat_can_enable_web_search(monkeypatch):
+    def fake_search_web(query, *, limit=3, timeout=10):
+        return [
+            SourceSnippet(
+                source_id="web_search",
+                title="联网搜索：深圳北理莫斯科大学最新招生通知",
+                url="https://admission.smbu.edu.cn/info/latest.htm",
+                snippet="最新官方网页摘要",
+            )
+        ]
+
+    monkeypatch.setattr("app.main.web_search.search_web", fake_search_web)
+    response = client.post(
+        "/api/chat",
+        json={"question": "联网搜索深北莫最新招生通知", "profile": {}, "enable_web_search": True},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert any(source["source_id"] == "web_search" for source in data["sources"])
+    assert any("联网搜索" in warning for warning in data["warnings"])

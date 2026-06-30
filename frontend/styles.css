@@ -58,6 +58,19 @@ input {
   font-size: 14px;
 }
 
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.check input {
+  width: 16px;
+  min-height: 16px;
+  margin: 0;
+}
+
 button {
   border: 0;
   border-radius: 6px;
@@ -143,4 +156,3 @@ button {
     border-bottom: 1px solid #d8dee9;
   }
 }
-

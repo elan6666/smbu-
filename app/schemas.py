@@ -14,6 +14,7 @@ class ApplicantProfile(BaseModel):
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1)
     profile: ApplicantProfile = Field(default_factory=ApplicantProfile)
+    enable_web_search: bool = False
 
 
 class SourceSnippet(BaseModel):
