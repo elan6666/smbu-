@@ -188,7 +188,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     )
     qwen_should_rewrite = (
         qwen_enabled()
-        and question_type not in {"greeting", "clarification"}
+        and question_type not in {"greeting", "clarification", "daily_chat"}
         and not web_requested
         and not score_rows
         and not program_rows

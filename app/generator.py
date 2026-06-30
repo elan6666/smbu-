@@ -50,6 +50,27 @@ def _dimension_summary(rows: List[Dict[str, str]]) -> str:
     )
 
 
+def _daily_chat_answer(question: str) -> str:
+    if any(keyword in question for keyword in ["谢谢", "感谢", "辛苦"]):
+        return "不客气。我是深北莫报考问答助手，后面你可以继续问分数线、专业证书、教学语言、招生人数或研究生招生。"
+    if any(keyword in question for keyword in ["笑话", "段子"]):
+        return (
+            "可以讲一个轻松的：为什么报考助手最怕没有位次？"
+            "因为只有分数没有位次，稳冲保就只能先打问号。"
+        )
+    if any(keyword in question for keyword in ["早上好", "晚上好", "你好", "嗨", "哈喽"]):
+        return "你好，我是深北莫报考问答助手。你可以随便聊两句，也可以直接问报考、专业、分数线和招生政策。"
+    if any(keyword in question for keyword in ["会什么", "能做什么", "功能"]):
+        return (
+            "我能做三类事：查深北莫本科和研究生招生资料，按省份/科类/位次整理历年分数线，"
+            "并解释专业证书、教学语言、招生人数、综合评价、宿舍和学费等报考问题。"
+        )
+    return (
+        "我是深北莫报考问答助手，可以陪你进行简短日常对话，也可以继续帮你查深圳北理莫斯科大学"
+        "本科/研究生招生、专业、分数线、综合评价、宿舍和学费等信息。"
+    )
+
+
 def build_answer(
     *,
     question: str,
@@ -107,10 +128,7 @@ def build_answer(
         )
 
     if question_type == "daily_chat":
-        return (
-            "我是深北莫报考问答助手，可以陪你进行简短日常对话，也可以继续帮你查深圳北理莫斯科大学"
-            "本科/研究生招生、专业、分数线、综合评价、宿舍和学费等信息。"
-        )
+        return _daily_chat_answer(question)
 
     body = []
     if score_rows or question_type == "score_query":

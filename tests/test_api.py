@@ -86,6 +86,15 @@ def test_daily_chat_keeps_assistant_identity():
     assert "深北莫" in data["answer"]
 
 
+def test_daily_chat_joke_is_bounded():
+    response = client.post("/api/chat", json={"question": "讲个笑话", "profile": {}})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "daily_chat"
+    assert len(data["answer"]) < 120
+    assert data["answer"].count("报考助手") <= 1
+
+
 def test_undergraduate_enrollment_boundary():
     response = client.post("/api/chat", json={"question": "本科招生人数是多少？", "profile": {}})
     assert response.status_code == 200
