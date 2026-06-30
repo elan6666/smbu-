@@ -104,8 +104,7 @@ def chat(req: ChatRequest) -> ChatResponse:
             web_sources = []
             warnings.append(f"联网搜索失败，已回退到本地资料库：{type(exc).__name__}。")
         if web_sources:
-            seen_urls = {src.url for src in sources}
-            sources.extend(src for src in web_sources if src.url not in seen_urls)
+            sources = web_sources + [src for src in sources if src.url not in {web_src.url for web_src in web_sources}]
             warnings.append("已启用联网搜索；结果优先限制在深北莫官方域名。")
         else:
             warnings.append("联网搜索没有返回可用的官方域名结果，已使用本地资料库。")
