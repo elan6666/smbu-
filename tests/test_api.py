@@ -14,6 +14,12 @@ def test_health():
     assert "qwen_configured" in response.json()
 
 
+def test_qwen_health_endpoint():
+    response = client.get("/api/qwen-health")
+    assert response.status_code == 200
+    assert "configured" in response.json()
+
+
 def test_chat_returns_answer_and_type():
     response = client.post(
         "/api/chat",
@@ -69,6 +75,15 @@ def test_clarification_does_not_dump_sources():
     assert data["question_type"] == "clarification"
     assert data["sources"] == []
     assert "补充一个方向" in data["answer"]
+
+
+def test_daily_chat_keeps_assistant_identity():
+    response = client.post("/api/chat", json={"question": "你是谁", "profile": {}})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "daily_chat"
+    assert data["sources"] == []
+    assert "深北莫" in data["answer"]
 
 
 def test_undergraduate_enrollment_boundary():

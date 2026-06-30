@@ -57,3 +57,6 @@ E055,本科普通类有没有单科要求,program_info,数学95;外语110,normal
 E056,硕士有哪些专业和招生人数,graduate_admission,硕士专业;招生人数;教学语言,normal
 E057,博士数学招多少人,graduate_admission,博士;数学;10人,normal
 E058,纳米生物技术硕士是英语教学吗,graduate_admission,纳米生物技术;英语,normal
+E059,你是谁,daily_chat,招生助手;深北莫,normal
+E060,你会什么,daily_chat,招生咨询;日常对话,normal
+E061,谢谢你,daily_chat,礼貌回复;继续咨询,normal

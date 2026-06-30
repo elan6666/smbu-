@@ -1,6 +1,6 @@
 # SMBU Admissions Dialogue System
 
-面向高考考生和家长的深圳北理莫斯科大学报考问答系统。项目采用 RAG-first 路线：官方数据抓取、结构化分数线查询、轻量意图分类训练、证据检索和 Web demo。
+面向高考考生和家长的深圳北理莫斯科大学报考问答系统。项目采用 RAG-first 路线：官方数据抓取、结构化分数线查询、轻量意图分类训练、证据检索、本地 Qwen 角色提示词调优、日常对话和 Web demo。
 
 ## Quick Start
 
@@ -61,3 +61,5 @@ uvicorn app.main:app --host 0.0.0.0 --port 18080
 ```
 
 `/api/health` returns `qwen_configured=true` only when `QWEN_API_URL` is set.
+
+`/api/qwen-health` checks whether the local Qwen process is actually reachable and reports the model/device when available.

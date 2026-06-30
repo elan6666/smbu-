@@ -16,3 +16,8 @@ def test_rule_based_major():
 def test_rule_based_greeting_and_clarification():
     assert rule_based_route("你好") == "greeting"
     assert rule_based_route("啥意思") == "clarification"
+
+
+def test_rule_based_daily_chat():
+    assert rule_based_route("你是谁") == "daily_chat"
+    assert rule_based_route("谢谢你") == "daily_chat"

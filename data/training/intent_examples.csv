@@ -64,3 +64,13 @@ hello,greeting,test
 啥意思,clarification,train
 什么意思,clarification,train
 没看懂,clarification,test
+你是谁,daily_chat,train
+你叫什么名字,daily_chat,train
+你会什么,daily_chat,train
+谢谢你,daily_chat,train
+辛苦了,daily_chat,train
+讲个笑话,daily_chat,train
+聊聊天,daily_chat,train
+早上好,daily_chat,test
+晚上好,daily_chat,test
+无聊了陪我聊会儿,daily_chat,test

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
+import requests
 from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -29,6 +31,22 @@ def index() -> FileResponse:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", "service": "smbu-admission-assistant", "qwen_configured": qwen_enabled(), "web_search": "available"}
+
+
+@app.get("/api/qwen-health")
+def qwen_health() -> dict:
+    api_url = os.getenv("QWEN_API_URL")
+    if not api_url:
+        return {"configured": False, "status": "disabled"}
+    health_url = api_url.rsplit("/v1/chat/completions", 1)[0] + "/health"
+    try:
+        response = requests.get(health_url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        data["configured"] = True
+        return data
+    except Exception as exc:
+        return {"configured": True, "status": "unreachable", "error": type(exc).__name__}
 
 
 @app.get("/api/search")
@@ -91,10 +109,10 @@ def dimensions(level: Optional[str] = None, keyword: Optional[str] = None) -> di
 def chat(req: ChatRequest) -> ChatResponse:
     question_type, confidence = predict_intent(req.question)
     search_query = req.question
-    sources = [] if question_type in {"greeting", "clarification"} else rag.search(search_query, limit=5)
+    sources = [] if question_type in {"greeting", "clarification", "daily_chat"} else rag.search(search_query, limit=5)
     warnings = []
 
-    web_requested = question_type not in {"greeting", "clarification"} and web_search.should_use_web_search(
+    web_requested = question_type not in {"greeting", "clarification", "daily_chat"} and web_search.should_use_web_search(
         req.question, req.enable_web_search
     )
     if web_requested:

@@ -9,6 +9,7 @@ from app.config import MODELS_DIR
 LABELS = [
     "greeting",
     "clarification",
+    "daily_chat",
     "school_fact",
     "admission_policy",
     "score_query",
@@ -25,6 +26,7 @@ LABELS = [
 KEYWORDS = {
     "greeting": ["你好", "您好", "hello", "hi", "嗨"],
     "clarification": ["啥意思", "什么意思", "没看懂", "解释一下", "说人话", "再说一遍"],
+    "daily_chat": ["你是谁", "你叫什么", "你会什么", "谢谢", "辛苦了", "讲个笑话", "聊聊天", "无聊", "早上好", "晚上好"],
     "unsupported": ["保证", "一定录取", "伪造", "私人电话", "彩票", "情书", "作弊"],
     "score_query": ["分数", "分数线", "位次", "排名", "最低分", "多少分", "稳", "冲", "保"],
     "admission_policy": ["章程", "录取规则", "招生计划", "政策", "调剂", "材料", "报考要求"],
