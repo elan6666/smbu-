@@ -146,16 +146,26 @@ def chat(req: ChatRequest) -> ChatResponse:
         dimension_rows=dimension_rows,
         profile=req.profile,
     )
-    qwen_answer = generate_with_qwen(
-        question=req.question,
-        question_type=question_type,
-        evidence=[f"{src.title}: {src.snippet}" for src in sources],
-        structured_rows=score_rows + program_rows + dimension_rows,
-        fallback_answer=answer,
-    )
-    if qwen_answer:
-        answer = qwen_answer
     warnings = []
+    qwen_should_rewrite = (
+        qwen_enabled()
+        and question_type not in {"greeting", "clarification"}
+        and not score_rows
+        and not program_rows
+        and not dimension_rows
+    )
+    if qwen_should_rewrite:
+        qwen_answer = generate_with_qwen(
+            question=req.question,
+            question_type=question_type,
+            evidence=[f"{src.title}: {src.snippet}" for src in sources],
+            structured_rows=[],
+            fallback_answer=answer,
+        )
+        if qwen_answer:
+            answer = qwen_answer
+    elif qwen_enabled() and (score_rows or program_rows or dimension_rows):
+        warnings.append("本题涉及结构化招生事实，已跳过本地千问改写以避免改错数字。")
     if confidence == 0.0:
         warnings.append("使用规则路由或模型不可用回退。")
     if not qwen_enabled():

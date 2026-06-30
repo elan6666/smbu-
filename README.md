@@ -46,7 +46,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ## Optional Local Qwen
 
-The app is RAG-first and works without a local LLM. To enable local Qwen generation, start an OpenAI-compatible Qwen service and point the backend to it:
+The app is RAG-first and works without a local LLM. To enable local Qwen generation, start an OpenAI-compatible Qwen service and point the backend to it. Structured facts such as scores, certificates, degree mode, teaching language, and enrollment counts are still answered by deterministic table logic so the model cannot rewrite numbers incorrectly:
 
 ```bash
 pip install -r requirements-qwen.txt

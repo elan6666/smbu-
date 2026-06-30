@@ -18,6 +18,7 @@ Date: 2026-06-30
 - Added `program_rows` and `dimension_rows` to `/api/chat`.
 - Added optional local Qwen/OpenAI-compatible generation hook and helper service.
 - Tightened RAG ordering so current-year official sources are preferred when the user does not specify a year.
+- Tightened Qwen usage: the server can connect to local Qwen, but structured admissions facts skip model rewriting to prevent wrong enrollment counts or certificate wording.
 
 ## Verification
 

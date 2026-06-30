@@ -89,6 +89,8 @@ python scripts/serve_qwen_openai.py --model Qwen/Qwen2.5-0.5B-Instruct --host 12
 
 If `QWEN_API_URL` is not set, `/api/health` reports `qwen_configured=false` and the app uses deterministic grounded generation.
 
+When Qwen is configured, the backend still skips Qwen rewriting for structured admissions facts such as scores, degree mode, teaching language, certificates, and enrollment counts. This keeps the local model connected without letting it alter official table values.
+
 Current v1 status: backend hook and helper service exist. The server must report `qwen_configured=true` before the final handoff claims Qwen is actively connected.
 
 ## Current Risks

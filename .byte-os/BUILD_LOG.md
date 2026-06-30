@@ -56,6 +56,10 @@ byte-auto
   - `本科招生人数是多少？`: official boundary plus directly available 10-person foreign-language recommended row
   - `纳米生物技术硕士是英语教学吗，招多少人？`: English teaching, 15 students
   - `硕士有哪些专业和招生人数？`: 18 official 2026 master directions
+- Server Qwen smoke:
+  - Qwen helper service ran on `127.0.0.1:18082` with `Qwen/Qwen2.5-0.5B-Instruct` and CUDA.
+  - Initial smoke showed Qwen could rewrite structured numbers incorrectly.
+  - Backend policy was tightened so Qwen is skipped for structured招生事实 and only used for non-structured evidence wording.
 
 ## Verification Run
 
