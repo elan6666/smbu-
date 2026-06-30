@@ -94,9 +94,10 @@ def chat(req: ChatRequest) -> ChatResponse:
     sources = [] if question_type in {"greeting", "clarification"} else rag.search(search_query, limit=5)
     warnings = []
 
-    if question_type not in {"greeting", "clarification"} and web_search.should_use_web_search(
+    web_requested = question_type not in {"greeting", "clarification"} and web_search.should_use_web_search(
         req.question, req.enable_web_search
-    ):
+    )
+    if web_requested:
         try:
             web_sources = web_search.search_web(req.question, limit=3)
         except Exception as exc:
@@ -171,6 +172,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     qwen_should_rewrite = (
         qwen_enabled()
         and question_type not in {"greeting", "clarification"}
+        and not web_requested
         and not score_rows
         and not program_rows
         and not dimension_rows
