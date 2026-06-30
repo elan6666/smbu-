@@ -167,7 +167,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     elif qwen_enabled() and (score_rows or program_rows or dimension_rows):
         warnings.append("本题涉及结构化招生事实，已跳过本地千问改写以避免改错数字。")
     if confidence == 0.0:
-        warnings.append("使用规则路由或模型不可用回退。")
+        warnings.append("该问题由规则路由识别。")
     if not qwen_enabled():
         warnings.append("未配置本地千问接口，当前使用规则化生成。")
     return ChatResponse(
