@@ -23,7 +23,7 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: int = 900
 
 
-def create_app(model_name: str, device: str) -> FastAPI:
+def create_app(model_name: str, device: str, adapter: Optional[str] = None) -> FastAPI:
     app = FastAPI(title="Local Qwen OpenAI-Compatible Server")
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     dtype = torch.float16 if device.startswith("cuda") else torch.float32
@@ -35,11 +35,15 @@ def create_app(model_name: str, device: str) -> FastAPI:
     )
     if not device.startswith("cuda"):
         model = model.to(device)
+    if adapter:
+        from peft import PeftModel
+
+        model = PeftModel.from_pretrained(model, adapter)
     model.eval()
 
     @app.get("/health")
     def health() -> Dict[str, Any]:
-        return {"status": "ok", "model": model_name, "device": device}
+        return {"status": "ok", "model": model_name, "device": device, "adapter": adapter}
 
     @app.post("/v1/chat/completions")
     def chat(req: ChatCompletionRequest) -> Dict[str, Any]:
@@ -69,11 +73,12 @@ def create_app(model_name: str, device: str) -> FastAPI:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
+    parser.add_argument("--adapter", default=None, help="Optional PEFT/LoRA adapter directory.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=18082)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
-    uvicorn.run(create_app(args.model, args.device), host=args.host, port=args.port)
+    uvicorn.run(create_app(args.model, args.device, args.adapter), host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

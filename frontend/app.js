@@ -2,6 +2,7 @@ const messages = document.getElementById("messages");
 const evidence = document.getElementById("evidence");
 const form = document.getElementById("form");
 const questionInput = document.getElementById("question");
+const chatHistory = [];
 
 function value(id) {
   const raw = document.getElementById(id).value.trim();
@@ -16,6 +17,11 @@ function addMessage(text, who) {
   div.textContent = text;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+}
+
+function pushHistory(role, content) {
+  chatHistory.push({ role, content });
+  while (chatHistory.length > 16) chatHistory.shift();
 }
 
 function renderEvidence(data) {
@@ -43,7 +49,9 @@ function renderEvidence(data) {
 }
 
 async function ask(question) {
+  const historyForRequest = chatHistory.slice(-12);
   addMessage(question, "user");
+  pushHistory("user", question);
   questionInput.value = "";
   addMessage("检索资料并生成回答中...", "assistant");
   const payload = {
@@ -56,6 +64,7 @@ async function ask(question) {
       preferred_major: value("major"),
     },
     enable_web_search: document.getElementById("webSearch").checked,
+    history: historyForRequest,
   };
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -64,6 +73,7 @@ async function ask(question) {
   });
   const data = await res.json();
   messages.lastChild.textContent = data.answer;
+  pushHistory("assistant", data.answer);
   renderEvidence(data);
 }
 
@@ -77,4 +87,6 @@ document.querySelectorAll("[data-q]").forEach((button) => {
   button.addEventListener("click", () => ask(button.dataset.q));
 });
 
-addMessage("请输入报考问题。我会优先使用官方资料和结构化分数线表回答，并标出资料边界。", "assistant");
+const opening = "请输入报考问题。我会优先使用官方资料和结构化分数线表回答，并标出资料边界。";
+addMessage(opening, "assistant");
+pushHistory("assistant", opening);

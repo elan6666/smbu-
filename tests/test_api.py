@@ -86,6 +86,14 @@ def test_daily_chat_keeps_assistant_identity():
     assert "深北莫" in data["answer"]
 
 
+def test_daily_chat_assistant_identity_variant():
+    response = client.post("/api/chat", json={"question": "你是什么助手", "profile": {}})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "daily_chat"
+    assert "深北莫" in data["answer"]
+
+
 def test_daily_chat_joke_is_bounded():
     response = client.post("/api/chat", json={"question": "讲个笑话", "profile": {}})
     assert response.status_code == 200
@@ -93,6 +101,71 @@ def test_daily_chat_joke_is_bounded():
     assert data["question_type"] == "daily_chat"
     assert len(data["answer"]) < 120
     assert data["answer"].count("报考助手") <= 1
+
+
+def test_context_recalls_last_user_question():
+    response = client.post(
+        "/api/chat",
+        json={
+            "question": "刚才我问了什么",
+            "profile": {},
+            "history": [
+                {"role": "user", "content": "人工智能怎么样"},
+                {"role": "assistant", "content": "人工智能是普通类单学籍专业。"},
+            ],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "context_recall"
+    assert "人工智能怎么样" in data["answer"]
+
+
+def test_context_recalls_previous_question_when_history_contains_current_message():
+    response = client.post(
+        "/api/chat",
+        json={
+            "question": "刚才我问了什么",
+            "profile": {},
+            "history": [
+                {"role": "user", "content": "人工智能怎么样"},
+                {"role": "assistant", "content": "人工智能是普通类单学籍专业。"},
+                {"role": "user", "content": "刚才我问了什么"},
+            ],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "context_recall"
+    assert "人工智能怎么样" in data["answer"]
+    assert "刚才我问了什么" not in data["answer"]
+
+
+def test_context_resolves_program_pronoun():
+    response = client.post(
+        "/api/chat",
+        json={
+            "question": "它是双学籍吗",
+            "profile": {},
+            "history": [
+                {"role": "user", "content": "人工智能怎么样"},
+                {"role": "assistant", "content": "人工智能是普通类单学籍专业。"},
+            ],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] in {"program_info", "major_intro"}
+    assert data["program_rows"]
+    assert {row["program"] for row in data["program_rows"]} == {"人工智能"}
+
+
+def test_major_intro_for_ai_program():
+    response = client.post("/api/chat", json={"question": "人工智能怎么样", "profile": {}})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["question_type"] == "major_intro"
+    assert {row["program"] for row in data["program_rows"]} == {"人工智能"}
 
 
 def test_undergraduate_enrollment_boundary():

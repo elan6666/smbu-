@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import database, rag, web_search
 from app.config import ROOT
+from app.context import resolve_context
 from app.generator import build_answer
 from app.llm import generate_with_qwen, qwen_enabled
 from app.router import predict_intent
@@ -107,17 +108,33 @@ def dimensions(level: Optional[str] = None, keyword: Optional[str] = None) -> di
 
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
-    question_type, confidence = predict_intent(req.question)
-    search_query = req.question
+    context = resolve_context(req.question, req.history)
+    if context.direct_answer:
+        warnings = ["已根据当前浏览器会话中的最近对话回答。"]
+        return ChatResponse(
+            answer=context.direct_answer,
+            question_type="context_recall",
+            sources=[],
+            score_rows=[],
+            program_rows=[],
+            dimension_rows=[],
+            warnings=warnings,
+        )
+
+    effective_question = context.effective_question
+    question_type, confidence = predict_intent(effective_question)
+    search_query = effective_question
     sources = [] if question_type in {"greeting", "clarification", "daily_chat"} else rag.search(search_query, limit=5)
     warnings = []
+    if context.note == "context_resolved_program" and context.referenced_program:
+        warnings.append(f"已结合上文将追问关联到“{context.referenced_program}”。")
 
     web_requested = question_type not in {"greeting", "clarification", "daily_chat"} and web_search.should_use_web_search(
-        req.question, req.enable_web_search
+        effective_question, req.enable_web_search
     )
     if web_requested:
         try:
-            web_sources = web_search.search_web(req.question, limit=3)
+            web_sources = web_search.search_web(effective_question, limit=3)
         except Exception as exc:
             web_sources = []
             warnings.append(f"联网搜索失败，已回退到本地资料库：{type(exc).__name__}。")
@@ -130,55 +147,72 @@ def chat(req: ChatRequest) -> ChatResponse:
     score_rows = []
     if question_type in {"score_query", "comparison_or_advice"}:
         score_rows = database.query_scores(
-            province=req.profile.province or ("广东" if "广东" in req.question else None),
+            province=req.profile.province or ("广东" if "广东" in effective_question else None),
             category=req.profile.category
-            or ("物理类" if "物理" in req.question else "历史类" if "历史" in req.question else None),
+            or ("物理类" if "物理" in effective_question else "历史类" if "历史" in effective_question else None),
             major=req.profile.preferred_major,
         )
     program_rows = []
     dimension_rows = []
     if question_type in {"program_info", "major_intro", "graduate_admission", "comparison_or_advice"}:
-        if "本科" in req.question:
+        if "本科" in effective_question:
             level = "本科"
-        elif "硕士" in req.question:
+        elif "硕士" in effective_question:
             level = "硕士"
-        elif "博士" in req.question:
+        elif "博士" in effective_question:
             level = "博士"
-        elif question_type == "graduate_admission" or "研究生" in req.question:
+        elif question_type == "graduate_admission" or "研究生" in effective_question:
             level = None
         else:
             level = None
         program = req.profile.preferred_major
         if not program:
-            for candidate in ["电子与计算机工程", "人工智能", "金融科技", "生物科学", "材料科学与工程", "数学", "生物学", "俄语语言文学", "纳米生物技术"]:
-                if candidate in req.question:
+            for candidate in [
+                "电子与计算机工程",
+                "人工智能",
+                "金融科技",
+                "智能感知工程",
+                "国际经济与贸易",
+                "信息与计算科学",
+                "生物科学",
+                "材料科学与工程",
+                "数学",
+                "生物学",
+                "俄语语言文学",
+                "纳米生物技术",
+            ]:
+                if candidate in effective_question:
                     program = candidate
                     break
-        asks_degree_comparison = any(k in req.question for k in ["单学籍还是双学籍", "单证还是双证", "是不是双", "是双", "是单"])
+        asks_degree_comparison = any(k in effective_question for k in ["单学籍还是双学籍", "单证还是双证", "是不是双", "是双", "是单"])
         degree_mode = None
         if not program or not asks_degree_comparison:
             degree_mode = (
                 "双学籍"
-                if any(k in req.question for k in ["双证", "双学籍", "莫斯科"])
+                if any(k in effective_question for k in ["双证", "双学籍", "莫斯科"])
                 else "单学籍"
-                if any(k in req.question for k in ["单证", "单学籍"])
+                if any(k in effective_question for k in ["单证", "单学籍"])
                 else None
             )
         program_rows = database.query_programs(level=level, program=program, degree_mode=degree_mode)
-        if not program_rows and any(k in req.question for k in ["招生人数", "计划", "语言", "证", "学籍"]):
+        if program:
+            exact_program_rows = [row for row in program_rows if row.get("program") == program]
+            if exact_program_rows:
+                program_rows = exact_program_rows
+        if not program_rows and any(k in effective_question for k in ["招生人数", "计划", "语言", "证", "学籍"]):
             program_rows = database.query_programs(level=level, degree_mode=degree_mode if not program else None)
-        if level == "本科" and not program and any(k in req.question for k in ["招生人数", "计划"]):
+        if level == "本科" and not program and any(k in effective_question for k in ["招生人数", "计划"]):
             program_rows = [row for row in program_rows if row.get("enrollment_count")]
         keyword = None
         for candidate in ["综合评价", "单科", "普通类", "招生人数", "计划", "教学语言", "硕士", "博士", "招生类型", "住宿费"]:
-            if candidate in req.question:
+            if candidate in effective_question:
                 keyword = candidate
                 break
         if keyword:
             dimension_rows = database.query_dimensions(level=level, keyword=keyword)
 
     answer = build_answer(
-        question=req.question,
+        question=effective_question,
         question_type=question_type,
         sources=sources,
         score_rows=score_rows,
@@ -196,11 +230,12 @@ def chat(req: ChatRequest) -> ChatResponse:
     )
     if qwen_should_rewrite:
         qwen_answer = generate_with_qwen(
-            question=req.question,
+            question=effective_question,
             question_type=question_type,
             evidence=[f"{src.title}: {src.snippet}" for src in sources],
             structured_rows=[],
             fallback_answer=answer,
+            history=[item.model_dump() for item in req.history[-6:]],
         )
         if qwen_answer:
             answer = qwen_answer

@@ -1,0 +1,12 @@
+{
+  "count": 960,
+  "train": 840,
+  "eval": 120,
+  "kinds": [
+    "assistant_identity_context",
+    "context_program_pronoun",
+    "program_grounding",
+    "refusal_future_score",
+    "score_guardrail"
+  ]
+}

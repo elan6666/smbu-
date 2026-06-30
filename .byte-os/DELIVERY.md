@@ -104,3 +104,69 @@ Current v1 status: backend hook and helper service are active on the server; `/a
 - Some source pages used fallback records because HTTP fetch failed.
 - Current score table focuses on Guangdong rows; broader province coverage should be added if time allows.
 - Retrieval is a lexical baseline; Qwen embedding/reranker integration is a v1 improvement.
+
+## V2 Delivery
+
+Date: 2026-07-01
+
+V2 adds short multi-turn context support and real Qwen2.5-7B QLoRA evidence.
+
+### Added Deliverables
+
+- Context resolver: `app/context.py`
+- History-aware API schema: `app/schemas.py`
+- History-aware frontend payload: `frontend/app.js`
+- Qwen SFT data builder: `scripts/build_sft_dataset.py`
+- Qwen2.5-7B LoRA/QLoRA training script: `scripts/finetune_qwen_lora.py`
+- Fine-tuned Qwen evaluation summary: `scripts/evaluate_finetuned_qwen.py`
+- Adapter-aware Qwen helper service: `scripts/serve_qwen_openai.py`
+- SFT dataset summary: `data/finetune/sft_summary.json`
+- Qwen training metrics: `report/qwen_finetune_metrics.tex`
+- Qwen loss figure: `report/figures/qwen7b-lora-loss.png`
+- Updated report PDF: `report/smbu-admission-dialogue-report.pdf`
+
+### V2 Verification Summary
+
+- Local `pytest`: 29 passed.
+- Local focused tests: 22 passed.
+- Local `python -m compileall app scripts`: passed.
+- SFT dataset: 960 examples, 840 train, 120 eval.
+- Qwen2.5-7B QLoRA server training: 2 epochs, 210 steps, final train loss 0.021, final eval loss 0.022.
+- Server `/api/qwen-health`: model `Qwen/Qwen2.5-7B-Instruct`, device `cuda`, adapter `models/qwen7b_lora`.
+- Server focused tests: 22 passed.
+- Server compile: passed.
+- LaTeX report compile: passed and copied to `report/smbu-admission-dialogue-report.pdf`.
+
+### V2 Server Run
+
+Current Web demo:
+
+```bash
+http://10.24.1.91:18080/
+```
+
+Current Qwen helper:
+
+```bash
+http://127.0.0.1:18082/v1/chat/completions
+```
+
+Current Qwen health:
+
+```json
+{"status":"ok","model":"Qwen/Qwen2.5-7B-Instruct","device":"cuda","adapter":"models/qwen7b_lora","configured":true}
+```
+
+Structured admissions facts still bypass Qwen rewriting. Qwen is used for non-structured evidence wording and short multi-turn language organization.
+
+### V2 Screenshot Slots
+
+Place final browser screenshots at:
+
+- `report/figures/demo-v2-context-chat.png`
+- `report/figures/demo-v2-score-query.png`
+- `report/figures/demo-v2-program-followup.png`
+- `report/figures/demo-v2-graduate-admission.png`
+- `report/figures/demo-v2-web-search.png`
+
+The current PDF shows placeholders for these five demo figures until screenshots are added.

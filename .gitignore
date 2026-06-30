@@ -10,10 +10,10 @@ data/processed/*
 artifacts/
 models/intent/*
 !models/intent/.gitkeep
+models/qwen*/
 report/build/
 *.aux
 *.log
 *.out
 *.toc
 *.synctex.gz
-

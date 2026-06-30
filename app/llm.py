@@ -17,6 +17,7 @@ def generate_with_qwen(
     evidence: List[str],
     structured_rows: List[Dict[str, str]],
     fallback_answer: str,
+    history: Optional[List[Dict[str, str]]] = None,
 ) -> Optional[str]:
     """Call a local Qwen/OpenAI-compatible chat endpoint when configured.
 
@@ -37,9 +38,15 @@ def generate_with_qwen(
         "资料不足时直接说明缺失并建议查官方招生网；不要编造分数线、证书、招生人数、日期或录取概率。"
         "回答要简洁，先给结论，再列依据。"
     )
+    recent_history = [
+        {"role": item.get("role", ""), "content": item.get("content", "")[:500]}
+        for item in (history or [])[-6:]
+        if item.get("role") in {"user", "assistant"} and item.get("content")
+    ]
     user = (
         f"问题类型：{question_type}\n"
         f"用户问题：{question}\n"
+        f"最近对话历史：{recent_history}\n"
         f"结构化数据：{structured_rows[:8]}\n"
         f"检索证据：{evidence[:5]}\n"
         f"规则fallback答案：{fallback_answer}\n"

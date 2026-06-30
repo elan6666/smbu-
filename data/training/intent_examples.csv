@@ -18,6 +18,9 @@ text,label,split
 湖南考生要多少分,score_query,train
 我有分数没有位次能判断吗,score_query,test
 电子与计算机工程学什么,major_intro,train
+人工智能怎么样,major_intro,train
+金融科技怎么样,major_intro,train
+智能感知工程适合什么学生,major_intro,train
 材料科学与工程专业介绍,major_intro,train
 数学与应用数学适合什么学生,major_intro,train
 俄语专业怎么样,major_intro,train
@@ -74,3 +77,4 @@ hello,greeting,test
 早上好,daily_chat,test
 晚上好,daily_chat,test
 无聊了陪我聊会儿,daily_chat,test
+你是什么助手,daily_chat,test

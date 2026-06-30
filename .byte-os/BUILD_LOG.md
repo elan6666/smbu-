@@ -137,3 +137,74 @@ byte-auto
 ## Next Wave
 
 No required wave remains for v1. Optional: broader province data, dense embeddings/reranker, and demo video.
+
+## V2 Build Log
+
+Date: 2026-07-01
+
+### Plans Executed
+
+- 007 Context Memory And Qwen2.5-7B QLoRA Fine-Tuning: in progress
+
+### Files Changed
+
+- Backend: `app/context.py`, `app/main.py`, `app/router.py`, `app/llm.py`, `app/schemas.py`
+- Frontend: `frontend/app.js`
+- Training: `scripts/build_sft_dataset.py`, `scripts/finetune_qwen_lora.py`, `scripts/evaluate_finetuned_qwen.py`, `requirements-qwen.txt`
+- Serving: `scripts/serve_qwen_openai.py`
+- Tests: `tests/test_api.py`
+- Data: `data/finetune/sft_examples.jsonl`, `data/finetune/sft_summary.json`, `data/training/intent_examples.csv`, `data/eval/questions.csv`
+- Report: `report/main.tex`, `report/references.bib`, `report/qwen_finetune_metrics.tex`, `report/smbu-admission-dialogue-report.pdf`
+
+### Local Verification
+
+- SFT data: `python scripts/build_sft_dataset.py --target-size 960`
+  - count: 960
+  - train: 840
+  - eval: 120
+  - kinds: assistant identity, context pronoun, program grounding, score guardrail, future-score refusal
+- Tests: `pytest`
+  - 28 passed before subagent fixes
+- Focused tests after subagent fixes: `pytest tests/test_api.py tests/test_router.py`
+  - 22 passed
+- Compile: `python -m compileall app scripts`
+  - passed
+- Intent training: `python scripts/train_intent.py`
+  - accuracy: 0.950
+  - macro-F1: 0.905
+- System evaluation: `python scripts/evaluate_system.py`
+  - questions: 63
+  - router accuracy: 0.794
+  - source coverage: 1.000
+- LaTeX: `tectonic -X compile report/main.tex --outdir report/build`
+  - passed
+  - copied to `report/smbu-admission-dialogue-report.pdf`
+
+### Subagent Review Findings And Fixes
+
+- Fixed API compatibility where history might include the current user message; context recall now skips the current question.
+- Fixed program-row pollution for exact program questions such as `人工智能怎么样` and pronoun follow-up `它是双学籍吗`.
+- Fixed report wording that implied server Qwen2.5-7B training was complete before loss artifacts existed.
+- Fixed training script metadata so model/method reflect actual `--model` and QLoRA vs bf16 LoRA fallback.
+
+### Server Progress
+
+- Server path: `/data/yilangliu/smbu-admission-assistant`
+- GPU: two NVIDIA GeForce RTX 5090 GPUs available.
+- Dependencies: `peft`, `bitsandbytes`, `datasets`, and `matplotlib` installed.
+- Direct Hugging Face access timed out; `HF_ENDPOINT=https://hf-mirror.com` works.
+- Qwen2.5-7B smoke training succeeded.
+- Qwen2.5-7B full QLoRA training succeeded: 2 epochs, 210 steps, final train loss 0.021, final eval loss 0.022.
+- Adapter saved on server at `models/qwen7b_lora`.
+- Training artifacts copied back locally:
+  - `report/qwen_finetune_metrics.tex`
+  - `report/figures/qwen7b-lora-loss.png`
+  - `artifacts/finetune/qwen7b_lora_metrics.json`
+  - `artifacts/finetune/qwen7b_lora_log_history.json`
+- Qwen helper service restarted on `127.0.0.1:18082` with `Qwen/Qwen2.5-7B-Instruct` and adapter `models/qwen7b_lora`.
+- Web backend restarted on `0.0.0.0:18080` with `QWEN_API_URL=http://127.0.0.1:18082/v1/chat/completions`.
+- Remote health:
+  - `/api/health`: `qwen_configured=true`
+  - `/api/qwen-health`: model `Qwen/Qwen2.5-7B-Instruct`, device `cuda`, adapter `models/qwen7b_lora`
+- Remote focused tests: `pytest tests/test_api.py tests/test_router.py` -> 22 passed.
+- Remote compile: `python -m compileall app scripts` -> passed.

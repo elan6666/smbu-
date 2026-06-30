@@ -15,6 +15,12 @@ class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1)
     profile: ApplicantProfile = Field(default_factory=ApplicantProfile)
     enable_web_search: bool = False
+    history: List["ChatMessage"] = Field(default_factory=list)
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
 
 
 class SourceSnippet(BaseModel):
