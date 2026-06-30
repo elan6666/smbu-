@@ -5,8 +5,25 @@
 \usepackage{longtable}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{graphicx}
 \geometry{left=2.6cm,right=2.6cm,top=2.6cm,bottom=2.6cm}
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue}
+
+\newcommand{\demofigure}[3]{
+\begin{figure}[htbp]
+\centering
+\IfFileExists{figures/#1}{
+\includegraphics[width=0.92\linewidth]{figures/#1}
+}{
+\fbox{\begin{minipage}[c][5.2cm][c]{0.88\linewidth}
+\centering
+\textbf{#2}\\[0.6em]
+请将截图保存为 \texttt{report/figures/#1}
+\end{minipage}}
+}
+\caption{#3}
+\end{figure}
+}
 
 \input{intent_metrics.tex}
 \input{eval_metrics.tex}
@@ -79,6 +96,20 @@
 \subsection{系统实现结果}
 
 系统提供了一个 Web demo。页面左侧记录省份、科类、分数、位次、意向专业和联网搜索开关，中间为对话区域，右侧展示本地检索来源、联网搜索结果、分数线表格、专业证书和研究生招生记录。该布局将“回答”和“依据”放在同一工作流中，便于老师在演示时检查系统是否真正进行了检索、联网搜索和结构化查询。
+
+\subsection{Demo 展示案例}
+
+为展示系统的完整工作流，本文在 Web demo 中选取五类代表性问题作为结果截图。第一类是日常对话问题，用于验证系统能够识别“你是谁”“谢谢”“讲个笑话”等非招生检索问题，并以深北莫报考问答助手身份简短回复。第二类是广东物理类分数线查询，用于展示结构化最低分和最低位次记录。第三类是本科专业信息查询，用于展示单双学籍、证书、教学语言和招生人数等维度。第四类是研究生招生查询，用于展示硕士专业、教学语言、招生计划和证书信息。第五类是联网搜索场景，用于展示系统在最新通知类问题上优先返回官方域名来源。
+
+\demofigure{demo-daily-chat.png}{日常对话与助手身份}{日常对话示例。用户输入“你是谁”或“讲个笑话”后，系统返回简短回答，不触发招生资料检索，也不输出无关来源。}
+
+\demofigure{demo-score-query.png}{广东物理类分数线查询}{结构化分数线示例。用户填写广东、物理类并询问“广东物理类多少分能报”，系统返回历年最低分、最低位次和报考边界说明。}
+
+\demofigure{demo-undergraduate-program.png}{本科专业证书与教学语言}{本科专业信息示例。用户询问“电子与计算机工程是单学籍还是双学籍”，系统返回专业、证书、教学语言和结构化来源。}
+
+\demofigure{demo-graduate-admission.png}{研究生招生计划查询}{研究生招生示例。用户询问“纳米生物技术硕士是英语教学吗，招多少人”，系统返回教学语言、招生人数和莫斯科大学硕士学位证书信息。}
+
+\demofigure{demo-web-search.png}{联网搜索官方通知}{联网搜索示例。用户勾选联网搜索并询问最新招生通知，系统优先展示深北莫官方域名结果，并在回答中标出联网搜索边界。}
 
 \subsection{意图分类结果}
 
