@@ -13,7 +13,7 @@ byte-auto
 - 003 Lightweight Intent Training: complete
 - 004 Web Demo And API: complete
 - 005 Evaluation And LaTeX Report: complete
-- 006 Server Deployment And Delivery: in progress until remote verification completes
+- 006 Server Deployment And Delivery: complete
 
 ## Files Changed
 
@@ -51,6 +51,18 @@ byte-auto
   - `/api/health` returned `ok`
   - `/api/chat` returned real 2025/2024 Guangdong score rows and evidence sources
   - `/` returned HTTP 200
+- GitHub:
+  - `git push -u origin main` succeeded
+- Server:
+  - clone path: `/data/yilangliu/smbu-admission-assistant`
+  - dependency install: passed using user-level `virtualenv`
+  - ingestion: 7 documents, 4 fetched, 3 fallback
+  - training: accuracy 0.900, macro-F1 0.852
+  - evaluation: 50 questions, router accuracy 0.760, source coverage 1.000
+  - pytest: 8 passed
+  - compileall: passed
+  - FastAPI: running on `0.0.0.0:18080`
+  - local health check to `http://10.24.1.91:18080/api/health`: passed
 
 ## Code Rule Notes
 
@@ -87,5 +99,4 @@ None. Auto mode allowed subagents, but the initial build had shared contracts ac
 
 ## Next Wave
 
-Push to GitHub, deploy on server, run remote smoke checks, and update delivery status.
-
+No required wave remains for v0. Optional v1: broader province data, dense embeddings, reranker, and report polish.

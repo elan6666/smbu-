@@ -6,7 +6,7 @@ Started at: 2026-06-30
 
 ## Current Loop
 
-Loop 1
+Terminal loop complete
 
 ## Completed Stages
 
@@ -18,14 +18,18 @@ Loop 1
 - local verification
 - three iteration loops
 - review 1
+- GitHub push
+- server deployment
+- remote verification
+- review 2
 
 ## Remaining Plans
 
-- 006 Server Deployment And Delivery: remote push/pull/run verification pending.
+None for v0.
 
 ## Review Verdict
 
-Latest review: iterate, because server deployment is pending.
+Latest review: ship.
 
 ## Iteration Count
 
@@ -37,9 +41,8 @@ off for initial build; sequential execution used because core files shared contr
 
 ## Hard Blockers
 
-None yet.
+None.
 
 ## Exact Resume Action
 
-Commit and push to GitHub, pull/run on server under `/data/yilangliu`, capture remote smoke output, then update delivery and final review.
-
+Optional v1 work: broaden score data, add dense embeddings/reranker, improve report figures, and record demo video.

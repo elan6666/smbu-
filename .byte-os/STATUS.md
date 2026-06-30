@@ -1,6 +1,6 @@
-Stage: building
+Stage: delivered
 Current command: byte-auto
-Next recommended command: continue byte-auto server delivery
+Next recommended command: optional byte-iterate for v1 improvements
 
 Summary:
 - Project idea: Shenzhen MSU-BIT University admissions dialogue system for gaokao applicants and parents.
@@ -28,9 +28,9 @@ Shaped artifacts:
 - DECISIONS.md
 
 Plans total: 6
-Plans complete: 5/6
+Plans complete: 6/6
 Ready plans:
-- 006-server-delivery.plan.md
+- none
 
 Pending plans:
 - none
@@ -45,6 +45,20 @@ Verification:
 - local Web smoke: passed on port 8001
 
 Delivery pending:
-- commit/push to GitHub
-- server pull/run under /data/yilangliu
-- remote smoke check
+- none
+
+GitHub:
+- origin: https://github.com/elan6666/smbu-.git
+- branch: main
+- push: succeeded
+
+Server:
+- path: /data/yilangliu/smbu-admission-assistant
+- port: 18080
+- health: http://10.24.1.91:18080/api/health returned ok
+- remote pytest: 8 passed
+- remote training: accuracy 0.900, macro-F1 0.852
+- remote evaluation: 50 questions, router accuracy 0.760, source coverage 1.000
+
+Latest review:
+- review-2 verdict: ship

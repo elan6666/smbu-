@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Server Deployment And Delivery
-status: in_progress
+status: complete
 wave: 5
 owner_role: Release Engineer
 depends_on: [005]
