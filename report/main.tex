@@ -55,29 +55,42 @@
 
 \subsection{系统流程}
 
-\begin{center}
-\begin{tikzpicture}[node distance=1.4cm, every node/.style={draw, rounded corners, align=center, minimum width=3.2cm, minimum height=0.8cm}]
-\node (src) {官方网页与表格};
-\node (ingest) [below of=src] {抓取与清洗};
-\node (store) [below of=ingest] {文档块与结构化招生表};
-\node (route) [below of=store] {意图分类与路由};
-\node (retrieve) [below left of=route, xshift=-1.7cm] {本地证据检索};
-\node (score) [below right of=route, xshift=1.7cm] {分数线查询};
-\node (web) [below of=retrieve, yshift=-0.4cm] {受控联网搜索};
-\node (gen) [below of=route, yshift=-2.5cm] {证据约束回答生成};
-\node (ui) [below of=gen] {Web Demo};
-\draw[->] (src) -- (ingest);
-\draw[->] (ingest) -- (store);
-\draw[->] (store) -- (route);
-\draw[->] (route) -- (retrieve);
-\draw[->] (route) -- (score);
-\draw[->] (route) -- (web);
-\draw[->] (retrieve) -- (gen);
-\draw[->] (web) -- (gen);
-\draw[->] (score) -- (gen);
-\draw[->] (gen) -- (ui);
+图~\ref{fig:runtime-pipeline} 展示了系统的在线问答流程。与普通聊天壳子不同，用户问题不会直接交给生成模型，而是先经过意图分类和证据路由；只有在证据已经确定后，系统才调用受控 Qwen 或规则模板组织回答。
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tikzpicture}[
+  node/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.9cm, font=\small},
+  smallnode/.style={draw, rounded corners, align=center, minimum width=2.7cm, minimum height=0.85cm, font=\small},
+  arrow/.style={->, >=stealth, line width=0.6pt}
+]
+\node[node] (user) at (0, 0) {用户问题\\考生画像};
+\node[node] (intent) at (3.8, 0) {意图分类\\关键词兜底};
+\node[smallnode] (table) at (8.0, 1.7) {结构化表查询\\分数/位次/证书/招生人数};
+\node[smallnode] (rag) at (8.0, 0) {本地 RAG 检索\\招生章程/专业介绍};
+\node[smallnode] (web) at (8.0, -1.7) {受控联网搜索\\官方域名优先};
+\node[node] (evidence) at (12.0, 0) {证据融合\\来源片段 + 表格记录};
+\node[smallnode] (qwen) at (15.9, 0.9) {Qwen 语言组织\\非结构化证据回答};
+\node[smallnode] (template) at (15.9, -0.9) {规则模板\\保护数字和政策事实};
+\node[node] (answer) at (19.8, 0) {带来源回答\\边界提示/风险说明};
+
+\draw[arrow] (user) -- (intent);
+\draw[arrow] (intent) -- (table);
+\draw[arrow] (intent) -- (rag);
+\draw[arrow] (intent) -- (web);
+\draw[arrow] (table) -- (evidence);
+\draw[arrow] (rag) -- (evidence);
+\draw[arrow] (web) -- (evidence);
+\draw[arrow] (evidence) -- (qwen);
+\draw[arrow] (evidence) -- (template);
+\draw[arrow] (qwen) -- (answer);
+\draw[arrow] (template) -- (answer);
 \end{tikzpicture}
-\end{center}
+}
+\caption{系统在线问答流水线。用户问题首先进入意图分类模块，然后被路由到结构化招生表、本地 RAG 检索或受控联网搜索。系统将检索片段和结构化记录合并为证据包；非结构化证据回答由本地 Qwen 组织语言，分数线、证书、教学语言和招生人数等强事实回答由规则模板直接生成，最终输出带来源和边界说明的回答。}
+\label{fig:runtime-pipeline}
+\end{figure}
 
 \subsection{数据层}
 
