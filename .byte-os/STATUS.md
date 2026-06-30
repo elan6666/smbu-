@@ -11,12 +11,10 @@ Summary:
 - Delivery target confirmed: code + Web demo + LaTeX-compiled PDF report.
 - Teacher emphasis confirmed: project completeness.
 - Lightweight model training confirmed as an auxiliary component.
-- Product code has not been written yet.
+- Product code, data scripts, Web demo, tests, server deployment, evaluation, and report have been delivered.
 
 Open confirmations:
-- Trusted data scope.
-- Git branch/deployment preference.
-- Report length and submission format.
+- none for v0 delivery.
 
 Shaped artifacts:
 - BYTE.md
