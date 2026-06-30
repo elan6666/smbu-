@@ -1,6 +1,6 @@
-Stage: v1 local verified; server redeploy pending
+Stage: delivered
 Current command: byte-auto
-Next recommended command: commit, push, server pull, Qwen attempt, remote smoke
+Next recommended command: none
 
 Summary:
 - Project idea: Shenzhen MSU-BIT University admissions dialogue system for gaokao applicants and parents.
@@ -12,7 +12,7 @@ Summary:
 - Teacher emphasis confirmed: project completeness.
 - Lightweight model training confirmed as an auxiliary component.
 - Product code, data scripts, Web demo, tests, server deployment, evaluation, and report have been delivered for v0.
-- V1 expands undergraduate/graduate admissions dimensions, repairs greeting/clarification behavior, adds optional local Qwen integration, and adds subagent-guided QA fixes.
+- V1 expands undergraduate/graduate admissions dimensions, repairs greeting/clarification behavior, runs local Qwen on the server, and includes subagent-guided QA fixes.
 
 Open confirmations:
 - none from user; current work proceeds under byte-auto.
@@ -43,11 +43,8 @@ Verification:
 - LaTeX: report PDF compiled
 - local API smoke: greeting, clarification, exact undergraduate program, undergraduate enrollment boundary, graduate enrollment, and master list passed
 
-Delivery pending:
-- commit and push v1 changes
-- server pull/restart
-- server Qwen runtime attempt
-- remote smoke verification
+Delivery remaining:
+- none
 
 GitHub:
 - origin: https://github.com/elan6666/smbu-.git
@@ -57,10 +54,13 @@ GitHub:
 Server:
 - path: /data/yilangliu/smbu-admission-assistant
 - port: 18080
-- health: http://10.24.1.91:18080/api/health returned ok
-- remote pytest: 8 passed
-- remote training: accuracy 0.900, macro-F1 0.852
-- remote evaluation: 50 questions, router accuracy 0.760, source coverage 1.000
+- health: http://10.24.1.91:18080/api/health returned ok with qwen_configured=true
+- Qwen service: http://127.0.0.1:18082 running Qwen/Qwen2.5-0.5B-Instruct on CUDA
+- remote pytest: 18 passed; targeted final smoke 11 passed after warning text patch
+- remote training: accuracy 0.9375, macro-F1 0.8974
+- remote evaluation: 58 questions, router accuracy 0.7586, source coverage 1.000
+- remote smoke: greeting, clarification, undergraduate single学籍, undergraduate enrollment boundary, graduate enrollment, and Qwen health passed
+- note: the final one-line warning text patch is committed locally/GitHub at 5856e42; server GitHub pull timed out, so the same line was applied directly on the server worktree before restart.
 
 Latest review:
-- review-3 initial verdict: fail from subagents; local fixes completed; remote redeploy pending
+- review-3 initial verdict: fail from subagents; all blocking findings fixed and verified

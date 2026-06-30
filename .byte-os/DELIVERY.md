@@ -61,7 +61,13 @@ Verified server deployment:
 - Path: `/data/yilangliu/smbu-admission-assistant`
 - Running port: `18080`
 - Health URL: `http://10.24.1.91:18080/api/health`
-- Current v0 health response was previously verified. V1 server redeploy and smoke are pending in the current auto loop.
+- Health response: `{"status":"ok","service":"smbu-admission-assistant","qwen_configured":true}`
+- Qwen helper service: `http://127.0.0.1:18082`, model `Qwen/Qwen2.5-0.5B-Instruct`, device `cuda`
+- Server pytest: 18 passed
+- Server targeted final smoke: 11 passed
+- Server training metrics: accuracy 0.9375, macro-F1 0.8974
+- Server evaluation metrics: 58 questions, router accuracy 0.7586, source coverage 1.000
+- Server smoke questions passed: `你好`, `啥意思`, `电子与计算机工程是单学籍还是双学籍？`, `本科招生人数是多少？`, `纳米生物技术硕士是英语教学吗，招多少人？`, `硕士有哪些专业和招生人数？`
 
 Because the server's Ubuntu Python lacked `python3.12-venv`, deployment used:
 
@@ -91,7 +97,7 @@ If `QWEN_API_URL` is not set, `/api/health` reports `qwen_configured=false` and 
 
 When Qwen is configured, the backend still skips Qwen rewriting for structured admissions facts such as scores, degree mode, teaching language, certificates, and enrollment counts. This keeps the local model connected without letting it alter official table values.
 
-Current v1 status: backend hook and helper service exist. The server must report `qwen_configured=true` before the final handoff claims Qwen is actively connected.
+Current v1 status: backend hook and helper service are active on the server; `/api/health` reports `qwen_configured=true`.
 
 ## Current Risks
 

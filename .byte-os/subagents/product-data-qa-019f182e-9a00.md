@@ -14,4 +14,4 @@ Result: fail before iteration 4.
 
 Risks: local fixes were not yet committed or deployed; Qwen was not actually running; undergraduate enrollment counts lacked official structured values; score coverage was narrow.
 
-Handoff: main agent fixed dialogue routing, structured program/dimension rows, graduate counts, tests, and report metrics; server redeployment remains required.
+Handoff: main agent fixed dialogue routing, structured program/dimension rows, graduate counts, tests, report metrics, Qwen runtime, and server deployment.

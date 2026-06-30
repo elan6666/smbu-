@@ -24,17 +24,14 @@ Fail before iteration 4.
 - Evaluation did not check structured program/dimension rows.
   - Status: fixed in `scripts/evaluate_system.py` and tests.
 - Qwen was only an optional hook.
-  - Status: helper service and backend hook exist; server runtime must report `qwen_configured=true` before claiming Qwen is enabled.
+  - Status: fixed. The server runs a local Qwen/OpenAI-compatible service and `/api/health` reports `qwen_configured=true`.
 - Server deployment was still on old code during the subagent review.
-  - Status: pending current commit, push, server pull, restart, and remote smoke.
+  - Status: fixed. Server tests and remote smoke passed after v1 redeploy.
 
 ## Current Local Verdict
 
-Ship locally after iteration 4.
+Ship.
 
 ## Required Before Final Handoff
 
-- Commit and push v1 changes.
-- Pull and restart server deployment.
-- Attempt to start local Qwen service on the server.
-- Verify server `/api/health`, greeting, clarification, undergraduate program, undergraduate enrollment boundary, and graduate enrollment answers.
+- No blocking item remains.

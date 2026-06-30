@@ -20,5 +20,5 @@ Subagent mode: on for v1 review.
 - Undergraduate enrollment boundary: fixed.
 - 2026 master program/count/language data: fixed.
 - Evaluation structured row checks: fixed.
-- Qwen hook: implemented; server runtime pending.
-- Server deployment: pending current v1 pull/restart.
+- Qwen hook: implemented and server runtime verified with `qwen_configured=true`.
+- Server deployment: verified on port 18080.

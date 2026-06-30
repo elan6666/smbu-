@@ -6,7 +6,7 @@ Started at: 2026-06-30
 
 ## Current Loop
 
-V1 delivery loop in progress.
+Terminal loop complete.
 
 ## Completed Stages
 
@@ -24,14 +24,16 @@ V1 delivery loop in progress.
 - review 2
 - iteration 4 local data/logic repair
 - subagent-guided review 3
+- Qwen server runtime
+- remote smoke verification
 
 ## Remaining Plans
 
-Commit, push, server redeploy, Qwen runtime attempt, and remote smoke for v1.
+None.
 
 ## Review Verdict
 
-Latest review: review-3. Initial subagent verdict was fail; local fixes are complete and remote verification is pending.
+Latest review: review-3. Initial subagent verdict was fail; fixes are complete and remote verification passed.
 
 ## Iteration Count
 
@@ -43,8 +45,8 @@ on for v1 review. Two read-only subagents checked product/data readiness and cod
 
 ## Hard Blockers
 
-None currently. Qwen runtime may become a documented limitation if model dependency installation or download fails on the server.
+None.
 
 ## Exact Resume Action
 
-Continue v1: commit and push, pull on `/data/yilangliu/smbu-admission-assistant`, attempt Qwen service on port 18082, restart FastAPI on port 18080, then run remote smoke.
+No required action remains. Optional future work: broaden province score coverage, add dense embeddings/reranker, and record a demo video.

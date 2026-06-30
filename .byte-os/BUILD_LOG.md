@@ -60,6 +60,7 @@ byte-auto
   - Qwen helper service ran on `127.0.0.1:18082` with `Qwen/Qwen2.5-0.5B-Instruct` and CUDA.
   - Initial smoke showed Qwen could rewrite structured numbers incorrectly.
   - Backend policy was tightened so Qwen is skipped for structured招生事实 and only used for non-structured evidence wording.
+  - Final server smoke passed with `qwen_configured=true`, correct greeting/clarification behavior, and correct structured answers for本科/硕士招生 facts.
 
 ## Verification Run
 
@@ -130,9 +131,9 @@ byte-auto
 - KR2: structured score lookup completed for Guangdong sample rows.
 - KR3: 50-question evaluation completed.
 - KR4: lightweight router training completed.
-- KR5: local Web demo completed; server verification pending.
+- KR5: local Web demo and server deployment completed.
 - KR6: LaTeX PDF compiled.
 
 ## Next Wave
 
-Commit and push v1, redeploy server, attempt Qwen runtime, and run remote smoke.
+No required wave remains for v1. Optional: broader province data, dense embeddings/reranker, and demo video.
