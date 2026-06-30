@@ -30,7 +30,16 @@ function renderEvidence(data) {
         `<div class="row">${r.year || ""} ${r.province || ""} ${r.category || ""} ${r.major || ""}<br>最低分：${r.min_score || "待官方表补全"}，最低位次：${r.min_rank || "待官方表补全"}</div>`
     )
     .join("");
-  evidence.innerHTML = rowHtml + sourceHtml || "没有返回来源。";
+  const programHtml = (data.program_rows || [])
+    .map(
+      (r) =>
+        `<div class="row">${r.level || ""} ${r.program || ""}<br>学籍/证书：${r.degree_mode || ""}；${r.smbu_certificate || "无"} / ${r.msu_certificate || "无"}<br>教学语言：${r.teaching_language || ""}；招生人数：${r.enrollment_count || "以正式计划为准"}</div>`
+    )
+    .join("");
+  const dimensionHtml = (data.dimension_rows || [])
+    .map((r) => `<div class="row">${r.level || ""} ${r.dimension || ""}：${r.value || ""}<br>${r.notes || ""}</div>`)
+    .join("");
+  evidence.innerHTML = programHtml + dimensionHtml + rowHtml + sourceHtml || "没有返回来源。";
 }
 
 async function ask(question) {
@@ -68,4 +77,3 @@ document.querySelectorAll("[data-q]").forEach((button) => {
 });
 
 addMessage("请输入报考问题。我会优先使用官方资料和结构化分数线表回答，并标出资料边界。", "assistant");
-

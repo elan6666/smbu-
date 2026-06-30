@@ -1,0 +1,13 @@
+# Optional local Qwen runtime dependencies.
+# Use this only when you want to run a Qwen model process on the server.
+#
+# Recommended lightweight model choices:
+# - Qwen/Qwen2.5-0.5B-Instruct
+# - Qwen/Qwen2.5-1.5B-Instruct
+#
+# The FastAPI app itself only needs QWEN_API_URL pointing to an
+# OpenAI-compatible local Qwen endpoint.
+transformers>=4.45
+accelerate>=0.34
+torch
+

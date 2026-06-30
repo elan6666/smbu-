@@ -1,0 +1,16 @@
+level,dimension,value,source_url,notes
+本科,招生类型,综合评价招生,https://admission.smbu.edu.cn/info/1360/12252.htm,2026章程：北京、山西、内蒙古、江苏、浙江、安徽、福建、山东、河南、湖北、湖南、广东、四川、陕西等22省份
+本科,招生类型,普通高考招生,https://admission.smbu.edu.cn/info/1360/12252.htm,2026章程：河北、辽宁、吉林、黑龙江、江西、广西、重庆、贵州、云南、甘肃、新疆等17省份
+本科,招生类型,艺术类专业招生,https://admission.smbu.edu.cn/info/1360/12252.htm,2026章程：面向广东、山东、湖南、重庆招生
+本科,招生类型,外语类保送生招生,https://admission.smbu.edu.cn/info/1360/12252.htm,面向教育部批准具有推荐保送生资格的外国语中学
+本科,本科综合评价招生人数,未在简章正文直接给出各专业人数,https://admission.smbu.edu.cn/info/1360/12152.htm,综合评价简章列出招生省份及招生专业，具体分省分专业计划以各省考试院公布目录为准
+本科,外语类保送生招生人数,俄语10人,https://admission.smbu.edu.cn/info/1360/12132.htm,2026外语类保送生招生简章明确俄语专业计划10人
+本科,艺术类招生人数,未在简章正文直接给出各专业人数,https://admission.smbu.edu.cn/info/1360/12322.htm,艺术类简章列出招生省份和专业，未直接给出各专业人数
+本科,综合评价成绩,6:3:1,https://admission.smbu.edu.cn/info/1360/12252.htm,综合成绩=高考成绩60%+学校测试成绩30%+高中学业水平合格性考试折算成绩10%
+本科,单科要求,数学95分及以上;外语110分及以上,https://admission.smbu.edu.cn/info/1360/12252.htm,普通类招生要求；总分非750省份按比例折算
+本科,教学语言,中俄英三语教学,https://admission.smbu.edu.cn/info/1360/12252.htm,入学后外语课程为俄语；俄语零基础可报
+本科,住宿费,1600元/生/学年,https://admission.smbu.edu.cn/info/1360/12252.htm,2026章程
+研究生,硕士计划总数,404,https://gradadmissions.smbu.edu.cn/info/1018/3021.htm,2026硕士简章逐专业方向计划合计；最终以正式下达计划为准
+研究生,博士计划总数,20,https://gradadmissions.smbu.edu.cn/info/1019/3020.htm,2026博士简章：数学10、生物学10
+研究生,硕士教学语言,俄语或英语,https://gradadmissions.smbu.edu.cn/info/1018/3021.htm,不同硕士专业教学语言不同
+研究生,博士教学语言,俄语或英语,https://gradadmissions.smbu.edu.cn/info/1019/3020.htm,博士专业研究方向教学语言为俄语或英语

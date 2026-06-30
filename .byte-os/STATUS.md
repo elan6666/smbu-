@@ -1,6 +1,6 @@
-Stage: delivered
+Stage: v1 local verified; server redeploy pending
 Current command: byte-auto
-Next recommended command: optional byte-iterate for v1 improvements
+Next recommended command: commit, push, server pull, Qwen attempt, remote smoke
 
 Summary:
 - Project idea: Shenzhen MSU-BIT University admissions dialogue system for gaokao applicants and parents.
@@ -11,10 +11,11 @@ Summary:
 - Delivery target confirmed: code + Web demo + LaTeX-compiled PDF report.
 - Teacher emphasis confirmed: project completeness.
 - Lightweight model training confirmed as an auxiliary component.
-- Product code, data scripts, Web demo, tests, server deployment, evaluation, and report have been delivered.
+- Product code, data scripts, Web demo, tests, server deployment, evaluation, and report have been delivered for v0.
+- V1 expands undergraduate/graduate admissions dimensions, repairs greeting/clarification behavior, adds optional local Qwen integration, and adds subagent-guided QA fixes.
 
 Open confirmations:
-- none for v0 delivery.
+- none from user; current work proceeds under byte-auto.
 
 Shaped artifacts:
 - BYTE.md
@@ -34,16 +35,19 @@ Pending plans:
 - none
 
 Verification:
-- pytest: 8 passed
+- pytest: 18 passed
 - compileall: passed
-- ingestion: 7 documents, 5 fetched, 2 fallback
-- training: accuracy 0.900, macro-F1 0.852
-- evaluation: 50 questions, router accuracy 0.760, source coverage 1.000
+- ingestion: 13 documents, 10 fetched, 3 fallback
+- training: accuracy 0.9375, macro-F1 0.8974
+- evaluation: 58 questions, router accuracy 0.7586, source coverage 1.000
 - LaTeX: report PDF compiled
-- local Web smoke: passed on port 8001
+- local API smoke: greeting, clarification, exact undergraduate program, undergraduate enrollment boundary, graduate enrollment, and master list passed
 
 Delivery pending:
-- none
+- commit and push v1 changes
+- server pull/restart
+- server Qwen runtime attempt
+- remote smoke verification
 
 GitHub:
 - origin: https://github.com/elan6666/smbu-.git
@@ -59,4 +63,4 @@ Server:
 - remote evaluation: 50 questions, router accuracy 0.760, source coverage 1.000
 
 Latest review:
-- review-2 verdict: ship
+- review-3 initial verdict: fail from subagents; local fixes completed; remote redeploy pending

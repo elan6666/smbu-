@@ -47,5 +47,47 @@
     "url": "https://www.dxsbb.com/news/148133.html",
     "source_type": "third_party_score_summary",
     "trust_level": "secondary"
+  },
+  {
+    "id": "smbu_2026_undergrad_regulation",
+    "title": "深圳北理莫斯科大学2026年夏季高考招生章程",
+    "url": "https://admission.smbu.edu.cn/info/1360/12252.htm",
+    "source_type": "official_undergraduate_policy",
+    "trust_level": "official"
+  },
+  {
+    "id": "smbu_2026_undergrad_comprehensive",
+    "title": "深圳北理莫斯科大学2026年本科综合评价招生简章",
+    "url": "https://admission.smbu.edu.cn/info/1360/12152.htm",
+    "source_type": "official_undergraduate_plan",
+    "trust_level": "official"
+  },
+  {
+    "id": "smbu_2026_foreign_recommended",
+    "title": "深圳北理莫斯科大学2026年外语类保送生招生简章",
+    "url": "https://admission.smbu.edu.cn/info/1360/12132.htm",
+    "source_type": "official_undergraduate_plan",
+    "trust_level": "official"
+  },
+  {
+    "id": "smbu_2026_master_admission",
+    "title": "深圳北理莫斯科大学2026年硕士研究生招生简章",
+    "url": "https://gradadmissions.smbu.edu.cn/info/1018/3021.htm",
+    "source_type": "official_graduate_master",
+    "trust_level": "official"
+  },
+  {
+    "id": "smbu_2026_master_transfer",
+    "title": "深圳北理莫斯科大学2026年硕士研究生招生二次调剂通知",
+    "url": "https://gradadmissions.smbu.edu.cn/info/1018/3241.htm",
+    "source_type": "official_graduate_master",
+    "trust_level": "official"
+  },
+  {
+    "id": "smbu_2026_phd_admission",
+    "title": "深圳北理莫斯科大学2026年博士研究生招生简章",
+    "url": "https://gradadmissions.smbu.edu.cn/info/1019/3020.htm",
+    "source_type": "official_graduate_phd",
+    "trust_level": "official"
   }
 ]

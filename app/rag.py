@@ -94,6 +94,7 @@ def search(query: str, limit: int = 5) -> List[SourceSnippet]:
     q_tokens = tokenize(query)
     if not q_tokens:
         return []
+    query_has_year = bool(re.search(r"20\d{2}", query))
     results = []
     for doc in load_documents():
         best_score = 0.0
@@ -104,7 +105,8 @@ def search(query: str, limit: int = 5) -> List[SourceSnippet]:
                 continue
             overlap = sum(1 for token in q_tokens if token in c_tokens)
             title_bonus = sum(1 for token in q_tokens if token in tokenize(doc.title)) * 0.5
-            score = overlap / max(len(set(q_tokens)), 1) + title_bonus
+            recency_bonus = 0.12 if not query_has_year and "2026" in doc.title else 0.0
+            score = overlap / max(len(set(q_tokens)), 1) + title_bonus + recency_bonus
             if score > best_score:
                 best_score = score
                 best_chunk = chunk
@@ -119,4 +121,3 @@ def search(query: str, limit: int = 5) -> List[SourceSnippet]:
                 )
             )
     return sorted(results, key=lambda item: item.score, reverse=True)[:limit]
-

@@ -49,4 +49,11 @@ E047,给我一份报考检查清单,comparison_or_advice,省份类别;位次;专
 E048,什么问题你不能回答,unsupported,无来源/隐私/保证录取,normal
 E049,深北莫适合什么样的学生,comparison_or_advice,兴趣;语言环境;培养特点,normal
 E050,如果分数线数据缺失怎么办,score_query,说明缺失;建议查官方,normal
-
+E051,深北莫哪些本科专业是双学籍,program_info,双学籍;专业列表;证书,normal
+E052,电子与计算机工程是单学籍还是双学籍,program_info,单学籍;证书,normal
+E053,生物科学是什么语言教学,program_info,俄语教学;英语教学;专业区分,normal
+E054,综合评价成绩怎么算,program_info,6:3:1;高考;校测;学考,normal
+E055,本科普通类有没有单科要求,program_info,数学95;外语110,normal
+E056,硕士有哪些专业和招生人数,graduate_admission,硕士专业;招生人数;教学语言,normal
+E057,博士数学招多少人,graduate_admission,博士;数学;10人,normal
+E058,纳米生物技术硕士是英语教学吗,graduate_admission,纳米生物技术;英语,normal

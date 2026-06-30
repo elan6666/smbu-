@@ -14,17 +14,48 @@ byte-auto
 - 004 Web Demo And API: complete
 - 005 Evaluation And LaTeX Report: complete
 - 006 Server Deployment And Delivery: complete
+- Iteration 4 V1 Admissions Data Expansion And Dialogue Logic Repair: local complete
 
 ## Files Changed
 
 - Repository foundation: `README.md`, `.gitignore`, `requirements.txt`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`
-- Backend: `app/`
+- Backend: `app/`, including program/dimension query endpoints and optional Qwen hook
 - Scripts: `scripts/`
-- Data: `data/sources.json`, `data/structured/admission_scores.csv`, `data/training/intent_examples.csv`, `data/eval/questions.csv`
+- Data: `data/sources.json`, `data/structured/admission_scores.csv`, `data/structured/programs.csv`, `data/structured/admission_dimensions.csv`, `data/training/intent_examples.csv`, `data/eval/questions.csv`, `data/eval/prospective_questions.csv`
 - Frontend: `frontend/`
 - Tests: `tests/`
 - Report: `report/main.tex`, `report/references.bib`, `report/*.tex`, `report/smbu-admission-dialogue-report.pdf`
 - Byte OS: `.byte-os/`
+- Optional Qwen helper: `requirements-qwen.txt`, `scripts/serve_qwen_openai.py`
+
+## V1 Verification Run
+
+- Ingest: `python scripts/ingest_sources.py --limit 20`
+  - documents: 13
+  - fetched: 10
+  - fallback: 3
+- Training: `python scripts/train_intent.py`
+  - accuracy: 0.9375
+  - macro-F1: 0.8974
+- Evaluation: `python scripts/evaluate_system.py`
+  - questions: 58
+  - router accuracy: 0.7586
+  - source coverage: 1.000
+  - average answer length: 1546.6
+- Tests: `pytest`
+  - 18 passed
+- Compile: `python -m compileall app scripts`
+  - passed
+- LaTeX: compile `report/main.tex`
+  - PDF generated at `report/build/main.pdf`
+  - copied to `report/smbu-admission-dialogue-report.pdf`
+- Local API smoke:
+  - `你好`: greeting, no sources
+  - `啥意思`: clarification, no sources
+  - `电子与计算机工程是单学籍还是双学籍？`: one undergraduate program row, single学籍
+  - `本科招生人数是多少？`: official boundary plus directly available 10-person foreign-language recommended row
+  - `纳米生物技术硕士是英语教学吗，招多少人？`: English teaching, 15 students
+  - `硕士有哪些专业和招生人数？`: 18 official 2026 master directions
 
 ## Verification Run
 
@@ -73,7 +104,8 @@ byte-auto
 
 ## Subagents Used
 
-None. Auto mode allowed subagents, but the initial build had shared contracts across backend, data, UI, and report, so sequential execution reduced merge risk.
+- Product/data QA subagent `019f182e-9a00-7f90-a098-2d25db5dc8c8`: failed v1 readiness before fixes; findings recorded in `.byte-os/subagents/product-data-qa-019f182e-9a00.md`.
+- Code QA subagent `019f182e-7d7c-7ad2-8d59-e49f48cdac19`: failed v1 readiness before fixes; findings recorded in `.byte-os/subagents/code-qa-019f182e-7d7c.md`.
 
 ## AGENTS.md Context Stack Used
 
@@ -99,4 +131,4 @@ None. Auto mode allowed subagents, but the initial build had shared contracts ac
 
 ## Next Wave
 
-No required wave remains for v0. Optional v1: broader province data, dense embeddings, reranker, and report polish.
+Commit and push v1, redeploy server, attempt Qwen runtime, and run remote smoke.

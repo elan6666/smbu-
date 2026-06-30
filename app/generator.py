@@ -26,12 +26,38 @@ def _score_summary(rows: List[Dict[str, str]]) -> str:
     return "\n".join(parts)
 
 
+def _program_summary(rows: List[Dict[str, str]]) -> str:
+    if not rows:
+        return "当前结构化专业表没有匹配记录；请核对最新招生章程或研究生招生简章。"
+    parts = []
+    for row in rows[:10]:
+        enrollment = row.get("enrollment_count") or "以正式计划为准"
+        parts.append(
+            f"{row.get('level')} {row.get('program')}：{row.get('degree_mode')}；"
+            f"教学语言：{row.get('teaching_language')}；招生人数：{enrollment}；"
+            f"证书：{row.get('smbu_certificate') or '无'} / {row.get('msu_certificate') or '无'}；"
+            f"备注：{row.get('notes')}。"
+        )
+    return "\n".join(parts)
+
+
+def _dimension_summary(rows: List[Dict[str, str]]) -> str:
+    if not rows:
+        return "当前维度表没有匹配记录。"
+    return "\n".join(
+        f"{row.get('level')} {row.get('dimension')}：{row.get('value')}（{row.get('notes')}）"
+        for row in rows[:8]
+    )
+
+
 def build_answer(
     *,
     question: str,
     question_type: str,
     sources: List[SourceSnippet],
     score_rows: List[Dict[str, str]],
+    program_rows: List[Dict[str, str]],
+    dimension_rows: List[Dict[str, str]],
     profile: ApplicantProfile,
 ) -> str:
     warnings = []
@@ -52,6 +78,10 @@ def build_answer(
         "scholarship": "奖助和学费问题建议以当年章程或学校官方说明为准。",
         "career": "就业和深造问题可以参考官方材料，但不应作绝对承诺。",
         "comparison_or_advice": "报考建议应结合位次、兴趣、专业培养和风险偏好。",
+        "program_info": "专业、证书和教学语言问题应优先查结构化招生章程数据。",
+        "graduate_admission": "研究生招生问题应以研究生招生简章和调剂通知为准。",
+        "greeting": "你好，我是深北莫报考问答助手。",
+        "clarification": "这个问题还不够具体。",
         "unsupported": "这个问题超出了招生咨询系统的安全或资料边界。",
     }.get(question_type, "我会基于当前资料回答。")
 
@@ -62,9 +92,26 @@ def build_answer(
             "你可以改问招生章程、专业信息、历年分数线或报考风险判断。"
         )
 
+    if question_type == "greeting":
+        return (
+            "你好，我可以帮你查深北莫本科/研究生招生信息、专业单双学籍、教学语言、招生人数、"
+            "分数线、综合评价规则、学费住宿费等。你可以直接问："
+            "“电子与计算机工程是单学籍吗？”或“纳米生物技术硕士招多少人？”"
+        )
+
+    if question_type == "clarification":
+        return (
+            "我没法判断你具体想问哪一项。你可以补充一个方向：分数线、专业证书、教学语言、"
+            "招生人数、综合评价规则、宿舍环境，或者研究生招生。"
+        )
+
     body = []
     if score_rows or question_type == "score_query":
         body.append("结构化分数线查询结果：\n" + _score_summary(score_rows))
+    if program_rows:
+        body.append("结构化专业/证书/招生人数信息：\n" + _program_summary(program_rows))
+    if dimension_rows:
+        body.append("招生维度信息：\n" + _dimension_summary(dimension_rows))
     if sources:
         body.append("检索到的依据：\n" + _source_lines(sources[:3]))
     else:
@@ -73,4 +120,3 @@ def build_answer(
         body.append("需要补充的信息：\n" + "\n".join(f"- {item}" for item in warnings))
     body.append("结论边界：本系统只做资料整理和风险提示，不能保证录取结果。")
     return intro + "\n\n" + "\n\n".join(body)
-

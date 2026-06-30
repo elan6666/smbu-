@@ -29,6 +29,8 @@ class ChatResponse(BaseModel):
     question_type: str
     sources: List[SourceSnippet] = Field(default_factory=list)
     score_rows: List[Dict[str, Any]] = Field(default_factory=list)
+    program_rows: List[Dict[str, Any]] = Field(default_factory=list)
+    dimension_rows: List[Dict[str, Any]] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
 
 
@@ -38,3 +40,8 @@ class ScoreQuery(BaseModel):
     category: Optional[str] = None
     major: Optional[str] = None
 
+
+class ProgramQuery(BaseModel):
+    level: Optional[str] = None
+    program: Optional[str] = None
+    degree_mode: Optional[str] = None

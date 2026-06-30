@@ -12,3 +12,7 @@ def test_rule_based_unsupported():
 def test_rule_based_major():
     assert rule_based_route("电子与计算机工程专业学什么") == "major_intro"
 
+
+def test_rule_based_greeting_and_clarification():
+    assert rule_based_route("你好") == "greeting"
+    assert rule_based_route("啥意思") == "clarification"

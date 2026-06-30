@@ -31,13 +31,13 @@ uvicorn app.main:app --reload --port 8001
 
 ## Verification Summary
 
-- `pytest`: 8 passed
+- `pytest`: 18 passed
 - `python -m compileall app scripts`: passed
-- `python scripts/ingest_sources.py --limit 8`: 7 documents, 5 fetched, 2 fallback
-- `python scripts/train_intent.py`: accuracy 0.900, macro-F1 0.852
-- `python scripts/evaluate_system.py`: 50 questions, router accuracy 0.760, source coverage 1.000
+- `python scripts/ingest_sources.py --limit 20`: 13 documents, 10 fetched, 3 fallback
+- `python scripts/train_intent.py`: accuracy 0.9375, macro-F1 0.8974
+- `python scripts/evaluate_system.py`: 58 questions, router accuracy 0.7586, source coverage 1.000
 - LaTeX compile: passed
-- Local Web smoke: `/api/health`, `/api/chat`, and `/` passed on port 8001
+- Local API smoke: greeting, clarification, exact undergraduate program, undergraduate enrollment boundary, graduate enrollment, and master list passed
 
 ## Server Run
 
@@ -61,10 +61,7 @@ Verified server deployment:
 - Path: `/data/yilangliu/smbu-admission-assistant`
 - Running port: `18080`
 - Health URL: `http://10.24.1.91:18080/api/health`
-- Health response: `{"status":"ok","service":"smbu-admission-assistant"}`
-- Server pytest: 8 passed
-- Server training metrics: accuracy 0.900, macro-F1 0.852
-- Server evaluation metrics: 50 questions, router accuracy 0.760, source coverage 1.000
+- Current v0 health response was previously verified. V1 server redeploy and smoke are pending in the current auto loop.
 
 Because the server's Ubuntu Python lacked `python3.12-venv`, deployment used:
 
@@ -73,6 +70,26 @@ python3 -m pip install --user virtualenv --break-system-packages
 python3 -m virtualenv .venv
 source .venv/bin/activate
 ```
+
+## Optional Local Qwen
+
+The backend supports a local Qwen/OpenAI-compatible endpoint through:
+
+```bash
+export QWEN_API_URL=http://127.0.0.1:18082/v1/chat/completions
+export QWEN_MODEL=Qwen/Qwen2.5-0.5B-Instruct
+```
+
+The helper service is:
+
+```bash
+pip install -r requirements-qwen.txt
+python scripts/serve_qwen_openai.py --model Qwen/Qwen2.5-0.5B-Instruct --host 127.0.0.1 --port 18082
+```
+
+If `QWEN_API_URL` is not set, `/api/health` reports `qwen_configured=false` and the app uses deterministic grounded generation.
+
+Current v1 status: backend hook and helper service exist. The server must report `qwen_configured=true` before the final handoff claims Qwen is actively connected.
 
 ## Current Risks
 

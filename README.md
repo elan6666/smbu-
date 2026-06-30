@@ -44,3 +44,16 @@ python scripts/train_intent.py
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
+## Optional Local Qwen
+
+The app is RAG-first and works without a local LLM. To enable local Qwen generation, start an OpenAI-compatible Qwen service and point the backend to it:
+
+```bash
+pip install -r requirements-qwen.txt
+python scripts/serve_qwen_openai.py --model Qwen/Qwen2.5-0.5B-Instruct --host 127.0.0.1 --port 18082
+export QWEN_API_URL=http://127.0.0.1:18082/v1/chat/completions
+export QWEN_MODEL=Qwen/Qwen2.5-0.5B-Instruct
+uvicorn app.main:app --host 0.0.0.0 --port 18080
+```
+
+`/api/health` returns `qwen_configured=true` only when `QWEN_API_URL` is set.

@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app.database import query_scores
+from app.database import query_dimensions, query_programs
 from app.generator import build_answer
 from app.rag import search
 from app.router import predict_intent
@@ -30,11 +31,39 @@ def main() -> None:
         score_rows = []
         if predicted in {"score_query", "comparison_or_advice"}:
             score_rows = query_scores(province="广东" if "广东" in question else None)
+        program_rows = []
+        dimension_rows = []
+        if predicted in {"program_info", "major_intro", "graduate_admission", "comparison_or_advice"}:
+            if "本科" in question:
+                level = "本科"
+            elif "硕士" in question:
+                level = "硕士"
+            elif "博士" in question:
+                level = "博士"
+            else:
+                level = None
+            program = None
+            for candidate in ["电子与计算机工程", "人工智能", "金融科技", "生物科学", "材料科学与工程", "数学", "生物学", "俄语语言文学", "纳米生物技术"]:
+                if candidate in question:
+                    program = candidate
+                    break
+            program_rows = query_programs(level=level, program=program)
+            if level == "本科" and not program and any(k in question for k in ["招生人数", "计划"]):
+                program_rows = [item for item in program_rows if item.get("enrollment_count")]
+            keyword = None
+            for candidate in ["综合评价", "单科", "普通类", "招生人数", "计划", "教学语言", "硕士", "博士", "招生类型", "住宿费"]:
+                if candidate in question:
+                    keyword = candidate
+                    break
+            if keyword:
+                dimension_rows = query_dimensions(level=level, keyword=keyword)
         answer = build_answer(
             question=question,
             question_type=predicted,
             sources=snippets,
             score_rows=score_rows,
+            program_rows=program_rows,
+            dimension_rows=dimension_rows,
             profile=ApplicantProfile(province="广东" if "广东" in question else None),
         )
         results.append(
@@ -46,6 +75,8 @@ def main() -> None:
                 "router_correct": predicted == row["question_type"],
                 "source_count": len(snippets),
                 "has_source": bool(snippets),
+                "program_row_count": len(program_rows),
+                "dimension_row_count": len(dimension_rows),
                 "answer_length": len(answer),
                 "confidence": confidence,
             }

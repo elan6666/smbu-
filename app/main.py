@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app import database, rag
 from app.config import ROOT
 from app.generator import build_answer
+from app.llm import generate_with_qwen, qwen_enabled
 from app.router import predict_intent
 from app.schemas import ChatRequest, ChatResponse, ScoreQuery
 
@@ -27,7 +28,7 @@ def index() -> FileResponse:
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "service": "smbu-admission-assistant"}
+    return {"status": "ok", "service": "smbu-admission-assistant", "qwen_configured": qwen_enabled()}
 
 
 @app.get("/api/search")
@@ -64,11 +65,27 @@ def scores(
     return {"count": len(rows), "rows": rows}
 
 
+@app.get("/api/programs")
+def programs(
+    level: Optional[str] = None,
+    program: Optional[str] = None,
+    degree_mode: Optional[str] = None,
+) -> dict:
+    rows = database.query_programs(level=level, program=program, degree_mode=degree_mode)
+    return {"count": len(rows), "rows": rows}
+
+
+@app.get("/api/dimensions")
+def dimensions(level: Optional[str] = None, keyword: Optional[str] = None) -> dict:
+    rows = database.query_dimensions(level=level, keyword=keyword)
+    return {"count": len(rows), "rows": rows}
+
+
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
     question_type, confidence = predict_intent(req.question)
     search_query = req.question
-    sources = rag.search(search_query, limit=5)
+    sources = [] if question_type in {"greeting", "clarification"} else rag.search(search_query, limit=5)
 
     score_rows = []
     if question_type in {"score_query", "comparison_or_advice"}:
@@ -78,22 +95,77 @@ def chat(req: ChatRequest) -> ChatResponse:
             or ("物理类" if "物理" in req.question else "历史类" if "历史" in req.question else None),
             major=req.profile.preferred_major,
         )
+    program_rows = []
+    dimension_rows = []
+    if question_type in {"program_info", "major_intro", "graduate_admission", "comparison_or_advice"}:
+        if "本科" in req.question:
+            level = "本科"
+        elif "硕士" in req.question:
+            level = "硕士"
+        elif "博士" in req.question:
+            level = "博士"
+        elif question_type == "graduate_admission" or "研究生" in req.question:
+            level = None
+        else:
+            level = None
+        program = req.profile.preferred_major
+        if not program:
+            for candidate in ["电子与计算机工程", "人工智能", "金融科技", "生物科学", "材料科学与工程", "数学", "生物学", "俄语语言文学", "纳米生物技术"]:
+                if candidate in req.question:
+                    program = candidate
+                    break
+        asks_degree_comparison = any(k in req.question for k in ["单学籍还是双学籍", "单证还是双证", "是不是双", "是双", "是单"])
+        degree_mode = None
+        if not program or not asks_degree_comparison:
+            degree_mode = (
+                "双学籍"
+                if any(k in req.question for k in ["双证", "双学籍", "莫斯科"])
+                else "单学籍"
+                if any(k in req.question for k in ["单证", "单学籍"])
+                else None
+            )
+        program_rows = database.query_programs(level=level, program=program, degree_mode=degree_mode)
+        if not program_rows and any(k in req.question for k in ["招生人数", "计划", "语言", "证", "学籍"]):
+            program_rows = database.query_programs(level=level, degree_mode=degree_mode if not program else None)
+        if level == "本科" and not program and any(k in req.question for k in ["招生人数", "计划"]):
+            program_rows = [row for row in program_rows if row.get("enrollment_count")]
+        keyword = None
+        for candidate in ["综合评价", "单科", "普通类", "招生人数", "计划", "教学语言", "硕士", "博士", "招生类型", "住宿费"]:
+            if candidate in req.question:
+                keyword = candidate
+                break
+        if keyword:
+            dimension_rows = database.query_dimensions(level=level, keyword=keyword)
 
     answer = build_answer(
         question=req.question,
         question_type=question_type,
         sources=sources,
         score_rows=score_rows,
+        program_rows=program_rows,
+        dimension_rows=dimension_rows,
         profile=req.profile,
     )
+    qwen_answer = generate_with_qwen(
+        question=req.question,
+        question_type=question_type,
+        evidence=[f"{src.title}: {src.snippet}" for src in sources],
+        structured_rows=score_rows + program_rows + dimension_rows,
+        fallback_answer=answer,
+    )
+    if qwen_answer:
+        answer = qwen_answer
     warnings = []
     if confidence == 0.0:
         warnings.append("使用规则路由或模型不可用回退。")
+    if not qwen_enabled():
+        warnings.append("未配置本地千问接口，当前使用规则化生成。")
     return ChatResponse(
         answer=answer,
         question_type=question_type,
         sources=sources,
         score_rows=score_rows,
+        program_rows=program_rows,
+        dimension_rows=dimension_rows,
         warnings=warnings,
     )
-
